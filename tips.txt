@@ -1,0 +1,864 @@
+<tips>	212-317
+
+Alt+上下：カーソル行を移動する
+Ctrl＋L：行を一括で選択する
+Shift+Alt+左クリック：矩形選択
+Alt+Shift+上下：カーソル行をコピーペースト
+
+番兵法：判定しない文字で文字列を挟んで配列外参照を防ぐ
+	s="$" + s + "$";
+貪欲法(Greedy)
+
+イテレータは最小で比べられない
+	for(auto i=left; i!=right; i++) {
+            cout << *i << endl;
+        }
+とすべき
+
+再帰：小さな部分問題に分割して解く
+動的計画法：計算の重複を防いで最適化する
+
+ラムダ関数：
+・関数名を持たない ex) auto f=[&](int x) { x+=5 }; ←auto型のfという変数に代入してるだけ
+・変数をキャプチャできる ex) ↑xが5増える
+・main関数内に書けて嬉しい
+・二分探索のチェック関数に使える
+
+最短経路問題：
+	辺に重みがない
+		→BFS
+	辺に重みがある
+		→重みが正のみ		→ダイクストラ
+		→重みに負が含まれる	→ワーシャル・フロイド法
+					※負閉路を検知できる
+※負閉路：合計の重みが負の閉路，周回して無限に重みを小さくできちゃう
+
+頂点倍化：(v, x)，頂点vにいるとき状態xをもつように記録
+	int W=1<<10;
+	v*W+x	でいける
+
+DAG：Directed Acyclic Graph，有向非巡回グラフ，有向でサイクルがないグラフ
+トポロジカルソート：Dすべての頂点u,vについてuがvよりも先に現れるよう1列に並べる
+
+DP：
+	集めるDP
+	配るDP
+
+	for文を回すDP	ex) ナップザック
+		順番に更新する必要がある
+	メモ化再帰	ex) 
+		DPの更新順序が非自明
+
+二人零和有限確定完全情報ゲーム←双方が最善を尽くした場合において先手必勝，後手必勝，引き分けが予め決まっている
+	零和	片方が勝てばもう片方が負ける
+	有限	有限回の手順で勝敗が決まる
+	確定	偶然的要素を含まない	ex) サイコロ
+	完全情報	隠された情報がない
+
+↑サイクルはないが同一場面に合流する
+	→動的計画法・メモ化再帰
+勝敗が決定している局面から出発して，後ろから遡るようにして解析する
+
+
+－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－
+RLE：Run Length Encoding，通称：圧縮
+    vector<pair<char, int>> p;
+    for(char c:s) {
+        if(p.size() && p.back().first==c) p.back().second++;
+        else p.push_back({c, 1}); 
+    }
+
+
+尺取法：等差数列の判定		※絶対[,)でやった方がいい
+    int r=0;
+    rep(l, n) {
+        while(r<n) {
+            if(l<r && ) break;
+            r++; 
+        }
+        ans+=r-l;
+    }
+
+
+LIS：Longest Incressing Subsequence，最長増加部分列問題：O(NlogN)
+    rep(i, n) {
+        int a;
+        cin >> a;
+        int idx=lower_bound(all(dp), a)-dp.begin();
+        if(idx==dp.size()) dp.push_back(a);
+        else dp[it]=a;
+    }
+    cout << dp.size() << endl;
+
+
+bit全探索：O(2^N)
+    rep(x, 1<<n) {
+        rep(bit, n) if((x>>bit)&1) {
+
+        }
+    }
+
+
+順列全探索：O(N!)
+    do {
+
+    } while(next_permutation(all(p)));
+※pの順列そのものが変わってる
+※昇順に並べられていくので配列pは一番小さい数である必要がある
+
+
+二分探索：O(logN)
+    while(l<=r) {
+        ll mid=(l+r)/2;
+        if(f(mid)) r=mid-1;
+        else l=mid+1;
+    }
+    ll ans=l;
+※f()はチェック関数
+
+※wj以内の距離にある個数がk以上かを返す
+        auto f=[&](int wj) -> bool {
+            int l=b-wj;
+            int r=b+wj;
+            int li=lower_bound(all(a), l)-a.begin();
+            int ri=upper_bound(all(a), r)-a.begin();
+            return ri-li>=k;
+        };
+
+
+三分探索：O(logN)
+    while(right-left>=1e-8) {
+        double c1=(left*2+right)/3;
+        double c2=(left+2*right)/3;
+        double d=right-left;
+        if(f(c1)>f(c2)) {
+            left=left+d/3;
+            ans=right;
+        } else {
+            right=right-d/3;
+            ans=left;
+        }
+    }
+
+
+DFS：Depth First Search：O(N+M)※頂点N，枝M
+        vector<ll> dist(n, -1);
+        dist[start]=0;
+        auto dfs=[&](auto dfs, int v) -> void {
+            rep(i, n) ans=max(ans, dist[i]);
+            for(auto [nv, nc]:G[v]) {
+                if(dist[nv]!=-1) continue;
+                dist[nv]=dist[v]+nc;
+                dfs(dfs, nv);
+		//ここで初期値に戻すのが大事
+                dist[nv]=-1;
+            }
+        };
+        dfs(dfs, start);
+stackでできる？
+
+
+BFS：Breadth First Serch；O(N+M)※頂点N，枝M
+    vector<int> dist(n, -1);
+    queue<int> que;
+    dist[0]=0;
+    que.push(0);
+    while(!que.empty()) {
+        int v=que.front();
+        que.pop();
+        for(auto nv:G[v]) {
+            if(dist[nv]!=-1) continue;
+            dist[nv]=dist[v]+1;
+            que.push(nv);
+        }
+    }
+
+    ※グリッドのやつ，
+    vector<vector<int>> dist(h, vector<int>(w, -1));
+    queue<pair<int, int>> que;
+    dist[si][sj]=0;
+    que.push({si, sj});
+    while(!que.empty()) {
+        pair<int, int> v=que.front();
+        que.pop();
+        rep(i, 4) {
+            int ni=v.first+di[i];
+            int nj=v.second+dj[i];
+            if(ni<0 || r<=ni || nj<0 || c<=nj) continue;
+            if(s[ni][nj]=='#' || dist[ni][nj]!=-1) continue;
+            dist[ni][nj]=dist[v.first][v.second]+1;
+            que.push({ni, nj});
+        }
+    }
+
+
+Dijkstra法：重みがあるときの単一始点最短経路を求める：O((MlogN)※頂点N，辺M
+※BFSは始点からのレベルがそのまま最短距離になるけど
+重みがあるとそうじゃないときがあるからpriority_queueを使って実現する
+    vector<int> dist(n, INF);
+    dist[0]=0;
+    priority_queue<pi, vector<pi>, greater<pi>> pq;
+    pq.push({0, 0});
+    while(!pq.empty()) {
+        auto [w, v]=pq.top();
+        pq.pop();
+        if(w!=dist[v]) continue;
+        for(auto [nw, nv]:G[v]) {
+            int n_wei=w+nw;
+            if(n_wei<dist[nv]) {
+                dist[nv]=n_wei;
+                pq.push({n_wei, nv});
+            }
+        }
+    }
+
+
+Floyd-Waeshall法：全点対間最短経路
+    vector<vector<ll>> dp(v, vector<ll>(v, INF));
+    rep(i, v) dp[i][i]=0;
+    rep(k, v) rep(i, v) rep(j, v) {
+	//辺が存在しない場合はやめる
+        if(dp[i][k]==INF || dp[k][j]==INF) continue;
+        dp[i][j]=min(dp[i][j], dp[i][k]+dp[k][j]);
+    }
+    //負閉路
+    rep(i, v) if(dp[i][i]<0) {
+        cout << "NEGATIVE CYCLE" << endl;
+        return 0;
+    }
+
+
+UnionFind：
+struct UnionFind {
+    vector<int> parent, rank;
+    UnionFind(int n) : parent(n), rank(n, 0) {
+        for (int i = 0; i < n; i++) 
+            parent[i] = i;
+    }
+    int findRoot(int x) {
+        if (parent[x] != x) 
+            parent[x] = findRoot(parent[x]);
+        return parent[x];
+    }
+    bool unite(int x, int y) {
+        int rx = findRoot(x), ry = findRoot(y);
+        if (rx == ry) return false;
+        if (rank[rx] < rank[ry]) {
+            parent[rx] = ry;
+        } else {
+            parent[ry] = rx;
+            if (rank[rx] == rank[ry])
+                rank[rx]++;
+        }
+        return true;
+    }
+};
+
+
+MST:Minimun Spannig Tree，最小全域木，Kruskal法かPrim法で求める
+
+Kruskal法：
+using Edge = tuple<int, int, int>;
+
+    sort(all(edge));
+    dsu uf(n);
+    ll ans=0;
+    int connected=0;
+    for(auto [wei, u, v]:edge) if(!uf.same(u, v)) {
+        uf.merge(u, v);
+        ans+=wei;
+        connected++;
+    }
+    //MSTが連結しているとき辺の数は必ず頂点-1個になる
+    if(connected==n-1) cout << ans << endl;    
+
+
+Prim法：ほぼダイクストラ
+    priority_queue<pi, vector<pi>, greater<pi>> pq;
+    vector<bool> used(v, false);
+    used[0]=true;
+    for(auto u:G[0]) pq.push({u.wei, u.v});
+    int ans=0;
+    while(!pq.empty()) {
+        auto [w, u]=pq.top();
+        pq.pop();
+        if(used[u]) continue;
+        used[u]=true;
+        ans+=w;
+        for(auto nu:G[u]) {
+            if(used[nu.v]) continue;
+            pq.push({nu.wei, nu.v});
+        }
+    }
+
+DP:
+//change min関数
+template<class T> inline bool chmin(T& a, T b) {
+    if (a > b) {
+        a = b;
+        return true;
+    }
+    return false;
+}
+
+
+DP(Coin Changing Problem)：O(N*M)※N種類のコイン，金額M
+    vector<vector<int>> dp(m+1, vector<int>(N+1, INF));
+    dp[0][0]=0;
+    rep(i, m) rep(n, N+1) {	//i種類のコインでn円を作ったときのコインの枚数
+        dp[i+1][n]=min(dp[i+1][n], dp[i][n]);//初期化
+        if(c[i]<=n) dp[i+1][n]=min(dp[i+1][n-c[i]]+1, dp[i+1][n]);
+    }
+
+
+LCS：Longest Common Subsequence，最長共通部分列：O(N*M)※文字列aの長さN，文字列bの長さM
+    vector<vector<int>> dp(s.size()+1, vector<int>(t.size()+1, 0));
+    rep(i, s.size()) rep(j, t.size()) {
+        if(s[i]==t[j]) chmax(dp[i+1][j+1], dp[i][j]+1);
+        else {
+            chmax(dp[i+1][j+1], dp[i+1][j]);
+            chmax(dp[i+1][j+1], dp[i][j+1]);
+        }
+    }
+※復元
+    string ans="";
+    int i=s.size(), j=t.size();
+    while(0<i && 0<j) {
+        if      (dp[i][j]==dp[i-1][j]) i--;
+        else if (dp[i][j]==dp[i][j-1]) j--;
+        else {
+            ans=s[i-1]+ans;
+            i--;
+            j--;
+        }
+    }
+
+
+メモ化再帰の基本
+auto rec(auto rec, int v) {
+    if(dp[v]が更新されている) return dp[v];
+    if(dpが完了した) return 1;
+    int res;
+    for (nv : 選択元) chmax(res, f(f, nv)+1);
+    return dp[v]=res;
+};
+※rec←Recursive(再帰)の略
+
+
+DAGの最長経路(メモ化再帰)：
+    vector<int> dp(n, -1);
+    auto f=[&](auto f, int v) {
+        if(dp[v]!=-1) return dp[v];
+        int res=0;
+        for(auto nv:G[v]) chmax(res, f(f, nv)+1);
+        return dp[v]=res;
+    };
+    int ans=0;
+    rep(v, n) chmax(ans, f(f, v));
+※これはDFSっぽいやりかた
+※BFSっぽくやってもいい
+
+
+確率DP：
+    //dp[i][j] i枚まで投げたときに表がj枚
+    vector<vector<double>> dp(n+1, vector<double>(n+1, 0.0));
+    dp[0][0]=1.0;
+    rep(i, n) for(int j=0; j<=i; j++) {
+        dp[i+1][j+1]+=dp[i][j]*p[i];
+        dp[i+1][j]+=dp[i][j]*(1.0-p[i]);
+    }
+
+
+期待値DP(メモ化再帰)：
+    //dp[i][j][k]：寿司が残り1個の皿がi枚，2個の皿がj枚，3個の皿がk枚
+    vector<vector<vector<double>>> dp(n+1, vector<vector<double>>(n+1, vector<double>(n+1, -1.0)));
+    auto rec=[&](auto rec, int i, int j, int k) {
+        if(dp[i][j][k]>=0.0) return dp[i][j][k];
+        if(i==0 && j==0 && k==0) return 0.0;
+        double res=1.0;
+        if(0<i) res+=rec(rec, i-1, j, k)*(double)i/n;
+        if(0<j) res+=rec(rec, i+1, j-1, k)*(double)j/n;
+        if(0<k) res+=rec(rec, i, j+1, k-1)*(double)k/n;
+        //p0：空皿を引く確率
+        //空皿を引いたとき自分に遷移するから
+        //dp[]=X+p0*dp[]
+        //dp[]=X/(1-p0)
+        double p0=(double)(n-i-j-k)/n;
+        return dp[i][j][k]=res/(1-p0);
+    };
+    double ans=rec(rec, one, two, three);
+
+
+二人零和有限確定完全情報ゲーム(集めるDP)：
+    //dp[i]：i個の石が残っているとき勝ち
+    vector<bool> dp(k+1, false);
+    for(int i=1; i<=k; i++) {
+        rep(j, n) {
+            if(0<=i-a[j]) dp[i]=dp[i]|!dp[i-a[j]];
+        }
+    }
+    if(dp[k]) cout << "First" << endl;
+    else cout << "Second" << endl;
+
+
+ミニマックス法(区間DP)：
+    //dp[i, j)：a[i]からa[j]-1までのX-Y
+    //先手←X-Yを最大化する
+    //後手←X-Yを最小化する
+    vector<vector<ll>> dp(n+1, vector<ll>(n+1, 0));
+    for(int len=1; len<=n; len++) {
+        for(int i=0; i+len<=n; i++) {
+            int j=i+len;
+            //n-len：2人で取った個数
+            if((n-len)%2==0) dp[i][j]=max(dp[i+1][j]+a[i], dp[i][j-1]+a[j-1]);
+            else dp[i][j]=min(dp[i+1][j]-a[i], dp[i][j-1]-a[j-1]);
+        }
+    }
+
+
+累積和DP：
+    //dp[i][j]：i人目までにj個の飴を分ける方法の総数
+    vector<vector<mint>> dp(n+1, vector<mint>(k+1, 0));
+    dp[0][0]=1;
+    rep(i, n) {
+        vector<mint> sumdp(k+2, 0);
+        for(int j=0; j<=k; j++) sumdp[j+1]=sumdp[j]+dp[i][j];
+        for(int j=0; j<=k; j++) {
+            //i番目の子どもがx個取ったときとは
+            //i-1番目の子どもまででj-x個を配る方法
+            dp[i+1][j]=sumdp[j+1]-sumdp[j-min(j, a[i])];
+        }
+    }
+
+
+区間DP：
+    rep(i, n) {
+        cin >> a[i];
+        sum[i+1]=sum[i]+a[i];
+    }
+    vector<vector<ll>> dp(n+1, vector<ll>(n+1, INF));
+    rep(i, n+1) dp[i][i]=0;
+    for(int len=2; len<=n; len++) {
+        rep(l, n+len-1) {
+            int r=l+len;
+            ll sm=sum[r]-sum[l];
+            rep(k, r) dp[l][r]=min(dp[l][r], dp[l][k]+dp[k+1][r]+sm);
+        }
+    }
+
+
+LIS発展：LIS(最長増加部分列)にそれぞれ値があるやつ
+    //dp[h]：最後の高さ(1番高い高さ)がhのときの最大値
+    //dp[i]=max(dp[i], max(dp[0]...dp[h[i-1]]))+a[i]
+    segtree<ll, op, e> dp(MAX);
+    rep(i, n) {
+        ll cur=dp.prod(0, h[i])+a[i];
+        dp.set(h[i], max(dp.get(h[i]), cur));
+    }
+    cout << dp.prod(0, MAX) << endl;
+
+
+桁DP：
+    int n=k.size();
+    //dp[i][r][t]：左からi桁まで，dの余りがr，タイトフラグt
+    //t==1 いままでの文字列がkに一致している 
+    //t==0 自由
+    vector<vector<vector<mint>>> dp(n+1, vector<vector<mint>>(d, vector<mint>(2, 0)));
+    dp[0][0][1]=1;
+    rep(i, n) {
+        int digit=k[i]-'0';
+        rep(r, d) rep(t, 2) {
+            if(dp[i][r][t].val()==0) continue;
+            int limit=(t==1) ? digit:9;
+            rep(x, limit+1) {
+                int nr=(r+x)%d;
+                int nt=(t==1 && x==digit) ? 1:0;
+                dp[i+1][nr][nt]+=dp[i][r][t];
+            }
+        }
+    }
+    //0分を引く
+    mint ans=dp[n][0][0]+dp[n][0][1]-1;
+
+
+bitDPの基本形：
+rep(x, 1<<n) {
+    rep(bit, n) if() {
+	int pre=x^(1<<bit)
+	1つ前の全パターンを足す
+    }
+}
+
+bitDP：O(2^N)
+    dp[0]=1;
+    for(int x=1; x<1<<n; x++) {
+        //manの先頭からwomanを決定する
+        //manを固定してwomanの順番だけで決める
+        int idx=__builtin_popcount(x);
+        //idx-1番目のmanまで済み
+        rep(woman, n) if(a[idx-1][woman]==1) {
+            if(!(x&(1<<woman))) continue;
+            //plus all of previous patarn
+            int pre=x^(1<<woman);
+            dp[x]+=dp[pre];
+        }
+    }
+    cout << dp[(1<<n)-1].val() << endl;
+
+
+※TSP:Traveling Salesman Problem：発展bitDP：O(2^N*N^2)
+    //都市0からn個の都市を巡回して，都市0に戻って来る
+    vector<vector<int>> dp(1<<n, vector<int>(n, -1));
+    dp[1<<0][0]=0;
+    //dp[s][v]
+    //いままで巡回した都市のビット列sとこれから巡回する都市v
+    function<int(int, int)> f=[&](int s, int v) -> int {
+        if(dp[s][v]!=-1) return dp[s][v];
+        int ans=INF;
+        int pre_s =s&~(1<<v);	//v抜きのs
+	//どの都市からvに行くか
+        rep(u, n) {
+            if(!(pre_s&(1<<u))) continue;	//uに行ったことがない
+            if(dist[u][v]==INF) continue;	//vに続く道がない
+            ans=min(ans, f(pre_s, u)+dist[u][v]);
+        }
+        return dp[s][v]=ans;
+    };
+    int ans=INF;
+    //どの都市から都市0に戻るか
+    rep(i, n) {
+        if(dist[i][0]==INF) continue;	//道がない
+        ans=min(ans, f((1<<n)-1, i)+dist[i][0]);
+    }
+
+
+Sieve of Eratosthenes：
+    vector<bool> prime(MAX, true);
+    prime[0]=false;
+    prime[1]=false;
+    for(int i=2; i*i<=MAX; i++) {
+        //2の倍数は全部消えてるからj=2*jじゃなくj=i*iでいい
+        if(prime[i]) for(int j=i*i; j<=MAX; j+=i) {
+            prime[j]=false;
+        }
+    }
+
+
+↓mint型ならこれやらなくていい
+高速な冪乗計算：
+    auto modpow=[&](ll m, ll n, int MOD) -> ll {
+        ll res=1;
+        while(0<n) {
+            if(n&1) res=res*m%MOD;
+            m=m*m%MOD;
+            n>>=1;
+        }
+        return res;
+    };
+
+
+逆元計算：a*x≡1 (mod p)←xがmod pにおけるaの逆元
+
+Fermatの小定理による逆元計算：pが素数出ないと使えない
+	//a^(p-1)≡1(mod p)
+	//a*a^(p-2)≡1(mod p)
+	//a^(p-2)はaの逆元
+	ll modinv(ll a, ll mod) {
+		return modpow(a, mod - 2, mod);
+	}
+
+
+拡張Euclidの互除法による逆元計算：a/b≡a*(1/b)≡a*b^(-1) (mod p)
+	//ax≡1 (mod p)
+	//ax+py=1 となるyが存在する(←拡張Euclidでいける，整数でやったやつ)
+	ll modinv(ll a, ll m) {
+	ll b = m, u = 1, v = 0;
+	while(b) {
+		ll t = a / b;
+		a -= t * b; swap(a, b);
+		u -= t * v; swap(u, v);
+	}
+	u = (u+m) % m; 
+	return u;
+	}
+
+
+高速なcCrの計算：
+    //mintをやって
+    int MAX=1e6;
+    vector<mint> fact(MAX), invfact(MAX);
+    fact[0] = 1;
+    for(int i = 1; i < MAX; i++){
+        fact[i] = fact[i-1] * i;
+    }
+    invfact[MAX-1] = fact[MAX-1].inv();
+    for(int i = MAX-1; i >= 1; i--){
+        invfact[i-1] = invfact[i] * i;
+    }
+    auto nCk = [&](int n, int k) -> mint {
+        if(k < 0 || k > n) return 0;
+        return fact[n] * invfact[k] * invfact[n-k];
+    };
+
+
+累積和：
+    vector<vector<int>> s(n+1, vector<int>(n+1, 0));
+    rep(i, n) rep(j, n) {
+        s[i+1][j+1]=s[i+1][j]+s[i][j+1]-s[i][j]+a[i][j];
+    }
+    rep(i, q) {
+        int p, q;
+        cin >> p >> q;
+        cout << s[q][q]-s[p-1][q]-s[q][p-1]+s[p-1][p-1] << endl;
+    }
+
+
+いもす法：
+    vector<int> imos(MAX+1, 0);
+    rep(i, n) {
+        int a, b;
+        cin >> a >> b;
+        imos[a]++;
+        imos[b]--;
+    }
+    rep(i, MAX+1) imos[i]+=imos[i-1];
+
+
+再帰：
+    vector<vector<int>> ans;
+    auto f=[&](auto f, vector<int> a) {
+        if(a.size()==n) {
+            ans.push_back(a);
+            return;
+        }
+        int l=1;
+        if(a.size()>0) l=a.back()+10;
+        a.push_back(l);
+        while(a.back()+10*(n-a.size())<=m) {
+            f(f, a);
+            a.back()++;
+        }
+    };
+    f(f, vector<int>());
+
+
+
+半分全列挙：
+
+
+－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－
+－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－
+＜ACL＞
+
+mint
+	using mint = modint998244353	法を決める
+	mint a=1			宣言
+	a.val()				法の下で値を返す
+	a.pow(n)			法の下でaのn乗
+	a.inv()				法の下で逆元を返す
+
+
+segment Tree(セグメント木)
+	int op(int a, int b) { return max(a, b); }
+	//計算した結果をどう返すか
+	int e() { return 0; }
+	//空の値をどうするか
+
+	segtree<int, op, e> seg(n)	長さnのセグ木を作る
+	seg.set(i, x)			seg[i]にxを代入する
+	seg.get(i)			i番目の要素を返す
+	seg.prod(int l, int r)		[l, r)の演算結果(op)を返す
+
+※Lazy segtree(遅延セグメント木)
+	using S = int;				dataの型
+	using F = int;				lazyの型
+	S op(S a, S b){ return std::min(a, b); }区間取得をなにするか
+	S e(){ return int(1e9)+1; }		dataの初期値，opに採用されない値
+	S mapping(F f, S x){ return x+f; }	lazyを下層のdataに伝播
+	F composition(F f, F g){ return f+g; }	lazyを下層のlazyに伝播
+	F id(){ return 0; }			lazyの初期値，mappingに採用されない値
+
+	※それぞれ
+		区間加算・区間最小値取得
+		区間加算・区間最大値取得
+		区間加算・区間和取得
+		区間更新・区間最小値取得
+		区間更新・区間最大値取得
+		区間更新・区間和取得
+	がある
+
+	宣言
+		区間最小値/最大値
+		lazy_segtree<S, op, e, F, mapping, composition, id> seg(n)
+
+		区間和取得
+		vector<S> v(n, {0, 1});
+		lazy_segtree<S, op, e, F, mapping, composition, id> seg(v);
+		
+	seg.prod(l, r).value	値を取り出す
+	seg.apply(l, r, x)		[l, r)のlazyにためため
+	※segtreeのやつ ex)seg.set(i, x) は遅延しないでできる
+
+
+Disjoint Set Union，DSU，union-fond
+	dsu uf(n)			n個の頂点を定義する
+	uf.leader(v)			頂点vの代表元を返す
+	uf.merge(u, v)			頂点uと頂点vをマージする
+	uf.same(u, v)			頂点uと頂点vが連結かどうか
+
+
+Sieve of Eratosthenes
+	Sieve p(n)		nまででコンストラクト
+	p.primes[]		素数が小さい順に入った配列
+	isPrime(x)		xが素数かどうかを判定
+	factorList(x) 		素因数分解			-> vector<int>		
+	factor(x)		素因数と指数の素因数分解	-> vector<pair<int, int>>
+	
+	
+－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－
+－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－
+
+a.size()-(upper_bound(all(a), x)-a.begin())	xより大きい要素の数
+※a.end() - upper_bound(all(a), b[i])		←これでもいい
+
+a.erase(unique(all(a)), a.end())		ユニークなソート済み配列を作る	※ソート必須
+	※unique(all(a))		ユニークな要素を先頭に詰めて，ユニークな部分の末尾のイテレータを返す
+					=重複を後ろに詰める
+※uniqueは隣接した要素しか判定しないから使う前にソート必須
+
+a.front()/a.back()				配列の値を取る
+※*a.begin()/*a.end()だと*a.end()が未定義でバグる
+
+int mx=*max_element(all(score))			配列の最大値
+※*max_element(a.begin()+b, a.begin()+e)	でb~eの範囲の最大値
+
+count(a.begin()+b, a.begin()+e, k)		b~eまでの値kの個数を返す
+reverse(a.begin()+b, a.begin()+e)		b~eを反転する
+roate(a.begin()+e, a.begin()+m ,a.begin()+e)	b~eをmだけ正に動かす	(=bをmにする基準)
+includes(all(a), all(b))			bがaに完全に含まれる	※昇順ソート必須
+
+lexicographical_compare(all(a), all(b))		aの方が辞書順で大きかったらtrue，小さかったらfalse
+next_permutation(all(a))			辞書順で1つ次を出力
+prev_permutation(all(a))			辞書順で1つ前を出力
+				※存在しなかったらfalseを返す
+
+binary_search(all(a), x)		aにxが存在してたらtrue，してなかったらfalse
+
+※
+
+s[i]=s[i]^1^0				0と1の反転
+
+cbrt(n)						nの3乗根
+cout << fixed << setprecision(20) << ans	小数点以下20桁表示する
+
+cout << (ans ? "Yes" : "No") << endl;
+
+(__int128)				long long型(64bit)でもオーバーフローする場合
+↑だめ	unsigned long long を使えばいい
+
+for (int x=head; x!=0; x=nxt[x]) {
+    cout << x << ' ';
+}
+cout << endl;				listみたいなやつの回し方
+
+
+
+
+－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－
+－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－－
+queue<型> 変数名
+	要素の追加		a.push(x)	
+	先頭の要素へのアクセス	a.front()	
+	先頭の要素を削除	a.pop();	
+	要素数の取得		a.size()	
+	空か判定		a.empty()
+
+※deque<type> a
+	要素の追加
+		先頭		a.push_front(x)
+		末尾		a.push_back(x)
+	要素の削除
+		先頭		a.pop_front()
+		末尾		a.pop_back()
+	
+
+priority_queue<型, vector<型>, greater/less<型>> 変数名
+	greater<型>：昇順でソート(＝最も小さいものを取り出す)
+	less<型>：降順でソート(＝最も大きいものを取り出す)
+	※要素がpair型のとき第一要素が比較要素
+	→auto [v, w]=pq.top()はできない
+
+	先頭の要素へのアクセス a.top()	
+	※他はqueueと同じ
+
+set：集合を扱うデータ構造、昇順で格納する、重複をなくして格納できる
+	a.insert(x)	集合aに要素xを追加する。但し、既に x が集合 a にある場合は追加しない
+	a.erase(x)	集合aからすべての値xを削除する
+	a.count(x)	集合aにxが含まれるかどうか
+	a.empty()  // 空ならtrueを返す
+	a.clear()	集合aを空にする
+	a.size(x)	集合aの要素数
+	for (auto value : a) {
+	}//値が小さい順にvalue取り出される
+
+※multiset：同じ値を複数取れる
+
+map<番地の型, 記録する型>：連想配列、map<pair<int>, int>とかもできる：pair型の番地にint型を記録する
+	for(auto p : a)をよく使う
+	値の削除	a.erase(key);	
+	所属判定	a.count(key)	
+	要素数の取得	a.size()
+	キーを探す	a.find(key)
+※map<double, vector<int>, greater<double>> mp	で降順のindexを取れる
+
+※unordered_map：ハッシュテーブルでやる，ソートしないから計算量O(1)
+lower_bound()とか使わないならこっちの方が良い
+
+※map型は自動でソートするからO(logN)
+
+※※※setとmapはst./mp.じゃないと計算量がO(N)になるので注意	Ex) st.lower_bound(x), mp.count(x)
+
+stack<値の型> 変数名
+	先頭に値を追加	a.push(値);
+	先頭の値へアクセス	a.top()
+	先頭の値を削除	a.pop();
+	要素数の取得	a.size()
+	a.empty()  // 空ならtrueを返す
+
+pair<string, char> a;
+	make_pair("**", 1); 		
+	tie(s, i)a：aをsとiに分割する
+
+※tuple<int, char, int, ...>：何個でもいける
+	make_tuple(a1, a2, ...)		tupleを生成する
+
+
+list<int> lst;	双方向リスト，挿入と削除がO(1)，カーソルを持っておく
+auto it=lst.end()	//itはイテレータ
+	it=lst.insert(it, x)	itの直前にxを挿入して，itも動かす
+	it=next(it)		itを次に動かす
+		it=next(it, x)		itをx分正に動かす	
+				※xは負でもいい
+		it=prev(it, x)		itをd負に動かす
+	lst1.splice(lst1.end, lst2)	lst1にlst2を結合する	※O(1)←強い
+
+	lst.push_front/back(x)	xを先頭/末尾に追加
+	lst.pop_front()/back()	先頭/末尾の要素を削除
+	lst.remove(x)		すべての値xを削除	※O(N)
+	lst.front()/back()	先頭/末尾の要素を出力
+
+
+bitset<4> a;
+	a=a&bなどint型と同じようにビット演算できる
+	a.set(x)	aのx桁目を1に変更する
+	a.reset(x)	a のx桁目を0に変更する
+	a[x]		配列と同様aのx桁目にアクセスできる
+	a.count()	aの全ての桁のうち1となっている桁の個数を返す(＝__builtin_popcount(x))
+
+
+AND		&	
+OR		|	
+XOR		^	
+NOT		~
+左シフト	<<	
+右シフト	>>
