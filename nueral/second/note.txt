@@ -1,0 +1,127 @@
+<ch01>
+
+a = b		浅いコピー，aのアドレスをbに移すだけ
+a[...] = b	深いコピー，aのメモリに実際にbを書き込む
+
+epoc		全データを何周してるか
+iteration	何個目のミニバッチか	＝パラメータ更新するタイミング
+
+	1 epocのiteration数 = データ総数/バッチサイズ
+
+Repeat	↔	Sum	※逆伝播の関係	
+
+
+<ch02>
+thesaurus(シソーラス)			単語の意味と単語ネットワークを人手で定義する	Ex) WordNet
+カウントベース				単語ごとにIDを振る
+
+分散表現					単語を意味を捉えたベクトル表現にする
+Distributional Hypothesis(分布仮説)	単語の意味は周囲の単語によって形成される
+	→単語自体に意味はなくコンテキストで形成される
+co-occurrence matrix(共起行列)		共起する単語の行列
+dimensionality reduction(次元削減)	疎なベクトルを密なベクトルにする，単語の数だけ次元が増えるのはよくない
+
+<ch03>
+・カウントベースの問題点
+	計算コストが大きすぎる	＝新しい単語が出てきたときにSVDを一からする必要がある(原理的に前のを利用することはできない)
+	単語の類似性のみエンコードしている
+
+推論ベース
+	NN使ってミニバッチで逐次的に学習できる(＝計算コスト低)，新しい単語が増えたときは前のパラメータを使って調整できる
+	単語の類似性と単語間のパターンも捉える
+one-hot		単語をベクトルにする，行列の積重みの行ベクトルを抜き出すことに該当する
+
+Word2vec	コーパスの単語の出現パターンをNNで学ぶ，2層のシンプルなネットワーク
+	CBOW(Continuous Bag-Of-Words)	コンテキストからターゲットを予測
+	Skip-gram			ターゲットからコンテキストを予測	←こっちの方が性能良いがち(時間はかかる)
+
+<ch04>
+(word2vecの)
+Embedding		one-hotの全結合を単語IDに該当するベクトルをそのまま抜き出すことでオーダー改善
+Negative Sampling	softmaxの代わりにsigmoid誤差する，多値分類を正例とランダムな負例の二値分類で近似することでオーダー改善
+
+単語ベクトルの評価			＝中間層のベクトル
+	semantic	単語の意味
+	syntax		単語の形態素
+
+<ch05>
+．フィードフォーワードの問題点
+	時系列データをうまく使えない
+Ex) CBOW←bag-of-words，袋の中の単語の並びは無視される
+
+word2vec			静的
+RNN(Recurent Neural Network)	動的	word2vecを初期値に設定してやることもあるとかないとか
+
+BPTT(Back-propagation Through Time)	時間方向に展開したNNの誤差逆伝播法
+Truncated BPTT				BPTTは時間軸方向に長くなりすぎるから適当な長さで切り取る b.c.メモリ使用量，勾配消失，ミニバッチ学習
+	↑逆伝播のみ切り取る，順伝播は切り取らない
+
+RNNのミニバッチ学習
+	データをシーケンシャルに与える
+	各バッチでデータを与える開始位置をずらす
+RNNLM(RNN Language Model)		これまで入力された単語を記憶し，それを元に次に出現する単語を予測する
+	perplexity(パープレキシティ)言語モデルの性能の指標，平均分岐数，確率の逆数	←小さいほど良い			
+	分岐数			次に取りうる選択肢の数
+
+<ch06>
+・RNNの問題点	
+長期の依存関係が勾配消失・爆発によってうまく学習できない
+	勾配消失	tanhの微分が0<1なのが原因			→LSTM
+	勾配爆発	matmulを通すと指数的に増加するのが原因	→勾配クリッピング
+LSTM(Long short-term memory)		short term memoryを長い期間記憶できるに由来
+※stateful = False	隠れ状態がリセットされるだけで重みはリセットされない
+→短い時系列データは前のデータと関連がないので積極的に隠れ状態をリセットするべき
+
+・改良
+LSTMレイヤの多層化		2~4層がいいがち
+Dropout		←時間軸方向に入れると過去の情報ほど消えやすくなるから深さ方向に入れる　※変分Dropoutなら大丈夫だし性能も良くなる
+重み共有			Embeddingレイヤ(V*H)とAffineレイヤ(H*V)の重みを同じにする(転置すれば次元が同じになる)
+		V　語彙数
+		H　隠れ状態の次元数
+epocごとにパープレキシティを評価しbestよりも低かったら学習係数を下げて重みを更新
+
+※GRU(Gated Recurrent Unit)
+LSTM	←計算に時間がかかる
+
+<ch07>
+seq2seq(sequence to sequence)	時系列データを別の時系列データへ変換する
+	決定的
+	確率的
+Encoder			任意の長さの文章を固定長のベクトルに変換する
+Decoder
+
+・改良
+Reverse(入力データの反転)		勾配の伝播が時系列と合致するから(らしい)	※理論的なことはわからないがめっちゃ精度良くなる
+Peeky(覗き見)			重要なEncoderの出力をすべてのLSTMレイヤとAffineレイヤに与える
+
+<ch08>
+Attention mechanism(注意機構)	
+
+・seq2seqの問題点
+Encoderの出力が固定長のベクトル
+
+・改良
+すべての時刻のEncoderの隠れ状態を取り出す
+コンテキストベクトルの生成		＝Attention Weight + Weight Sum
+	Attention Weight	時刻ごとの重要度の確率分布(Softmax)
+	Weight Sum		EncoderとAttention Weightの重み付き和を計算する	＝コンテキストベクトル
+
+alignment(アライメント)		猫↔catみたいな単語の対応関係
+
+・Attentionに関する残りのテーマ
+双方向LSTM
+Skipコネクション
+	時間方向の勾配消失			←ゲート
+	層を増やすことによる深さ方向の勾配消失	←skipコネクション
+・Attentionの応用
+NMT(Neural Machine Translation)		ニューラル翻訳
+
+RNN	←時間方向で順に処理するから並列化できない
+Transformer
+	Self-Attention		自己注意機構，文中の単語間の関連度を把握し文脈を反映させる
+	Feed Forward		全結合し非線形性をもたせる
+
+・見方によればEncoderがメモリを書き込んでそれをDecoderが読み込んでるように見える？
+NTM(Neural Turing Machine)
+	コンテンツベースのAttention		似たベクトルをメモリから探す
+	位置ベースのAttention		前に着目したメモリの位置からシフトする	←メモリを読み込むコンピュータの動きを再現

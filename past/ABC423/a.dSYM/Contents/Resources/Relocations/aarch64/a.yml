@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/dmainf/mac/past/ABC423/a'
+relocations:     []
+...

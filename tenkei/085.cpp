@@ -1,0 +1,29 @@
+#include <bits/stdc++.h>
+using namespace std;
+#define rep(i,n) for(int i=0;i<(n);i++)
+#define all(a) a.begin(),a.end()
+#define rall(a) a.rbegin(),a.rend()
+#define YES cout<<"Yes"<<endl
+#define NO cout<<"No"<<endl
+using ll=long long;
+using pi=pair<int,int>;
+const int di[]={+1,-1,+0,+0};
+const int dj[]={+0,+0,+1,-1};
+const int INF=1e9;
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    ll k;
+    cin >> k;
+    //42
+    //2 3 7
+    int ans=0;
+    for(ll a=1; a*a*a<=k; a++) {
+        for(ll b=a; a*b*b<=k; b++) {
+            if(k%(a*b)==0) ans++;
+        }
+    }
+    cout << ans << endl;
+
+    return 0;
+}

@@ -1,0 +1,47 @@
+<ch01>	Evolution from Transformer to ViT
+Vision and Language	コンピュータビジョン分野におけるTransformerの活用
+Bottom-Up Attention	物体検出によって得た物体をベクトルとして扱い画像とテキストを同じに扱う
+	Single-Stream：1つのネットワークで画像とテキスト(モダリティ)を処理する
+	Multi-Stream：画像とテキストを別のネットワークで処理したあと別のネットワークで統合する
+ViT			CNNをSelf-Attentionに置き換えた
+
+
+<ch02>	Fundamentals and Implementations of ViT
+nn.Module class		カスタムモジュール
+				__init__：モジュールの部品		ex) 線形層, 活性化関数
+				forward：順伝播の挙動
+ViT = Input layer + Encoder + MLP head
+Input layer		画像を入力に変換する層
+	1．split into Patches	Patchに分割してflatten処理
+	2．Embedding		NNを使って意味をもたせた数値変換する
+	3．Class Token		画像全体の情報を凝縮したベクトル，ラベル的なものだがベクトルで可能
+	4．Positional Embedding	Patchに位置情報を伝える
+Self-Attention			Patchを良いPatchにすることが目標
+	Patchごとに
+	1．埋め込み		線形層によるQuery, Key, Valueの埋め込み
+	2．類似度			Softmax(QueryとKeyの内積(＝行列積)) → Attention Weigh(加重和の係数)
+	3．加重和			Attention WeightとValueの行列積
+MHSA(Multi-Head Self-Attention)	1つのPatchに複数のAttention Weightを持たせる(異なる関係を学習)，QKVをHeadに分割する
+Encoder Block			Layer Normalization + MHSA + MLP
+	Layer Normalization：Patchごとにz-scoreみたいに正規化
+	MLP：Liner → GELU(活性化関数) → Dropout → Liner → Dropout
+	前半：MHSA
+	後半：MLP
+MLP Head		クラス(ラベル)分類を行う分類器，LayerNorm + 線形層
+
+
+<ch03>	Exploring of ViT through Experimentation and Visualization
+画像サイズが小さいときは，フルスクラッチより事前学習+転移学習の方が性能良いがち(デカいデータでないとTransformer系は弱い)
+Inductive Bias			帰納バイアス，暗黙的な前提知識，良いこともあれば悪いことも
+・Data Augmentation
+AutoAugment			回転・反転・色変換の種類と強度をいい感じに最適化
+RandAugment			拡張数K・強度Mをグリッドサーチで見つける
+・Visualization
+Attention Rollout		Attention Weightを可視化する方法
+	1．Attention Weightを同じ層内で，ヘッドごとに平均化
+	2．平均化したものを層ごとに掛ける
+Transformer Explainability	Attention Rolloutの改良，予測クラスから逆伝播した勾配でAttention Weightを重み付け
+
+CNN	←テクスチャで認識
+ViT	←形状で認識(人間もそう)
+

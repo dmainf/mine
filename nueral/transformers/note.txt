@@ -1,0 +1,163 @@
+<ch01>	Introduction of transformers
+Hugging Face Transformers	PyTorch，TensorFlow，JAXに対応したライブラリ，事前学習の重みも読み込める
+パイプライン		生のテキストをファインチューニングされたモデルに与えてくれる
+Hugging Faceでできること
+・センチメント分析		顧客のフィードバックがPositiveかNevativeか分析する
+・質問応答		回答を得たい質問をモデルに与えると該当するテキストのスパンを返す
+・要約			生成するから複雑
+・翻訳
+・テキスト生成
+
+
+<ch02>	Text Classification
+チェックポイント		重みの集合
+トークン化		文字トークン化，単語トークン化，サブワードトークン化
+	文字トークン化：スペルミスや珍しい単語の処理
+	単語トークン化：句読点が扱われる，語形変化やスペルミスを考慮できない
+	サブワードトークン化：
+テキスト分類の学習		特徴抽出，ファインチューニング
+	特徴抽出器：隠れ状態から感情を分類する
+	ファインチューニング：推論時のエンドツーエンドで事前学習済みモデルのパラメータを更新する
+
+
+<ch03>	Transformer Anatomy
+Encoder-only		テキストを数値表現に変換する，双方向アテンション
+Decoder-only		可能性の高い単語を繰り返し予測する，自己回帰型アテンション
+Encoder-Decoder		テキストを別のテキストへのマッピングをモデル化する		e.g. 機械翻訳
+	T5：翻訳・要約・分類などを"<Task>:<TEXT>"で統一してやったことでいい感じ
+・Self-Attention		各トークンの固定的な埋め込み＋系列全体の加重平均
+			=元の意味に周りの平均を足し合わせる
+※自分の文章を見るのがSelf-Attention，生成するのに生成した自分の文章ではなく他人の文章を見て決めるのがAttention(Cross-Attenion)
+スケール化ドット積アテンション	セルフアテンション層を実装する方法
+	1．各トークンの単語ベクトルに重み行列を掛けてQuery・Key・Valueを射影する
+	2．QueryとKeyのドット積(=類似度=Attention Score)を計算する	※ドット積=内積
+	3．Attention Scoreの分散を正規化しSoftmaxでアテンションの重み(Attention Weight)を計算する
+	4．Keyに対応するトークンのValueにAttention Weightを掛け加重和しアクティベーションを計算する
+	Query：検索ワード
+	Key：検索の見出し
+	Value：Keyのトークンが持つ値
+・Multi-head Attention	複数のアテンションヘッドでトークン間の類似性を多面的に理解する
+	Attention Head：独立したQuery・Key・Valueを使って関連度を計算する仕組み(=スケール化ドット積アテンション)
+・位置単位順伝播層		すべての単語に個別に同じ計算を行う，Attentionで見た単語を深さ方向に見る	=カーネルサイズ1の1次元畳み込み
+
+"""
+Embedding→Multi-head Attention→Feed Forward Network →Affine→Softmax
+"""
+
+・デコーダ
+マスク付きマルチヘッドセルフアテンション層	未来の情報を見ない層，未来のトークンのアテンションスコアを-infにする
+エンコーダ・デコーダアテンション層		Encoderの情報(Key，Valueベクトル)を取り込む層
+
+
+<ch04>	Multilingual Named Entity Recognition
+NER	Named Entity Recognition，固有表現認識，テキストをあらかじめ定義されたカテゴリに分類すること
+	ORG	組織
+	LOC	場所
+	PER	人
+	B-	固有表現の開始
+	I-	固有表現の続き
+	O-	固有表現ではない
+トークン化のパイプライン
+	1．正規化			空白削除，小文字化
+	2．事前トークン化		テキストを小さなオブジェクト(e.g. 単語)に分割する
+	3．トークナイザーモデル	コーパスを使いサブワード化する
+	4．後処理			[CLS]や[SEP]などの特別なトークンを追加する
+Sentence Pieceトークナイザー	空白を_に置き換えるなどして空白で単語を区切らない言語もまとめてトークン化できる
+Transformer's architecture = body + head
+	body：推論時のタスクに依存しないトークン埋め込み層やTrandformer層(事前学習済みモデル)
+	head：タスクに特化した最後の層
+ゼロショット転移			モデルを追加の学習なしで別のデータに適応すること
+
+
+<ch05>	Text Generation
+Greedy Search Decoding		貪欲法，全体の確率が高い単語列を見逃す
+Beam Search Decoding		ビームサーチ，出現確率上位b件のトークンを記録し，累積確率が高い上位b件を残すの繰り返し
+	nグラムペナルティ：同じ単語の並びをなくす(確率を0にする)
+Sampling Methods		サンプリング手法，各時刻で全語彙のモデルの確率分布からサンプリングする，温度を変えてサンプルの品質を調整できる
+	温度：確率分布の山を調整する，低温：一貫性，高温：多様性
+	Top-k/Top-pサンプリング←温度を使う手法の代替・拡張
+Top-k Sampling			確率の高いkトークンだけからサンプリングする，サンプリング手法でありえないトークンを選ばなくできる
+Top-p Sampling			Nucleus Sampling，合計pになるトークンだけからサンプリング(＝動的な閾値)
+
+
+<ch06>	Summarization
+・Quality of Generated Text
+BLEU(適合率)			n-gram適合率とBrevity Penalty，生成文の中に参照文がどれだけ含まれるか
+	N-gram適合率：生成文に含まれる単語・フレーズが正解文の中にどれだけ含まれるか
+	Brevity Penalty：短文ペナルティ，生成文が正解分より短い場合にスコアを減衰させる
+ROUGE(再現率)			生成文がが参照文をどれだけ網羅できているか，ROUGE-1・ROUGE-2・ROUGE-Lを3つ使うのが論文ではマナー
+	ROUGE-1：1-gram(単語)の一致
+	ROUGE-2：2-gram(2語の並び)の一致
+	ROUGE-L：最長共通部分列の一致
+・ファインチューニング
+teacher force 			系列生成モデルで使われる学習戦略，正解を次の入力として与える
+勾配累積				重みの更新を小さなバッチごとに累積していくことで中間出力をリセットできる，メモリ不足を回避できる
+
+
+<ch07>	Question Answering
+質問応答	抽出型 or 生成型
+	抽出型：文書内に含まれる回答のスパンを特定する
+Retriever-Reader		Retriever(←深層学習しない)で必要なドキュメントを抜き出しReader
+Retriever			関連する文書を検索する
+	sparse：文書とクエリについて全単語の出現頻度のベクトルの内積を取る		=固有名詞		e.g. BM25
+	dense：TransformerのようなEncoderを使って意味ベクトルで検索		=意味		e.g. DPR(Dense Passage Retrieval)
+Reader				Retrieverで抽出した文書から回答を抽出する
+ドメイン適応			FT
+RAG(Retrieval-Augmented Generation)	検索拡張型生成，Retriever-ReaderをRetriever-Generationにしたもの，生成する過程がFT含めたE2Eで誤差逆伝播法できる
+	RAG-Sequence：検索した文書を使って生成する
+	RAG-Token：異なる文書も使える，こっちのほうが性能いいがち
+
+
+<ch08>	Making Transformers Efficient in Production
+モデルのトレードオフ = モデル性能 + レイテンシー + メモリ
+	レイテンシー：予測するのに必要な時間
+・Distillation：知識蒸留，teacherモデルを模倣して小さいstudentモデルを学習する方法，ラベルに加えてdark knowledgeも参照する
+Dark knowledge			teacherモデルのソフトな温度付き出力
+・Quantization：量子化，浮動小数点数を低精度の固定小数点数に対応させて離散化しすべて線形に分散させる，ビット数を減らすことで計算効率を向上させる
+動的量子化：重みを事前に量子化，アクティベーションは推論時に量子化する
+静的量子化：PTQ，キャリブレーションで事前に決めた量子化スキームで事前にアクティベーションと重みを量子化する(キャリブレーション：出力の分布を事前に測定する)
+ONNX：様々なフレームワーク(e.g. PyTorch, TensorFlow)の共通のファイル形式
+・Prunning：枝刈り，重要度スコアで学習時の重みの結合を削除する(＝モデルをスパースにする)
+Magnitude Prunning		重みの大きさで決めた重要度スコアが最低なもの(0から遠い重み)から削除，重みは事前学習で決めるから転移学習には有効でない
+Movement Prunning		FT中の勾配の追跡で決めた重要度スコアが最低なもの(0から動いている重み)から削除
+	
+
+<ch09>	Dealing with Few to No Labels
+アノテーション			データにラベル付けする作業
+・ラベル付きデータがない
+ナイーブベイズ分類木		シンプルなベースラインとしていい，入力の変動に強い
+ゼロショット分類			追加のFTを全くしないでそのまま使う，ラベル付きデータがまったくないときに有効
+・ラベル付きデータが少ない
+	含意関係認識：前提が与えられたとき仮説が正しいかを判定するタスク
+データ拡張		
+	バックトランスレーション：起点言語を機械翻訳し再び起点言語に戻す
+	トークン摂動：ランダムに同義語変換・単語挿入・入れ替え・削除などを行う
+k近傍法				埋め込みでk-NN
+FT
+In-Context Learning		重みを更新せずプロンプトで性能上げる
+Few-shot learning
+・ラベルなしデータの活用
+UDA(Unsupervised Data Ardmentation)	教師なしデータ拡張，元データとデータ拡張したデータのKLダイバージェンスが小さくなるようにFT	←よさげ
+UST(Uncertainty-aware Self Training)	教師なし自己学習，自信のある予測を疑似ラベルとして学習する
+
+
+<ch10>	Training Transformers from Scratch
+メモリマッピング			ディスク(HHD, SSD)とメモリのアドレスを紐づける，メモリにコピーしないからいいね
+・トークナイザーの評価
+Subword fertility			サブワード豊度，単語ごとのサブワードの平均数
+継続単語の割合			コーパス中の2つ以上に分割された単語の割合
+カバレッジ指標			コーパス中未知語の割合
+・
+パープレキシティ			予測時の分岐数，クロスエントロピーの損失の指数化，どれくらい迷ってるか
+DDP(Distributed Data Parallel)	バッチごとに分割し各ワーカー(GPU)の勾配平均を全ワーカーで同期する
+
+
+<ch11>	Future Directions
+べき乗則：	評価損失L(X) ~ 1/(X^α)
+	X = モデルサイズN, 計算機バジェットC, データセットサイズD
+・Sparse Attention：Self Attention層の計算量を減らすためにQueryとKeyのペアの数を減らす
+global attention		グローバルアテンション，系列内に特別なトークンを定義する
+band attention			バンドアテンション，隣接(ウィンドウの幅はある)のアテンションだけ計算する
+dilated attention		拡張アテンション，いくつかのQueryとKeyをスキップする
+random attention		ランダムアテンション，各QueryにランダムなKeyをサンプリングする
+block local attention		ブロック局所アテンション，ブロックに分割してアテンションをブロック内に制限する

@@ -1,0 +1,71 @@
+<step1>	Normal Distribution
+確率変数			取る値が確率的に決まる変数
+確率分布			起こり得るすべての値に対して確率が示されたもの
+Central Limit Theorem	中心極限定理，(サンプルサイズが大きければ)母集団の確率分布に問わずサンプルの平均(和でもいい)は正規分布になる
+
+
+<step2>	Maximum Likelihood Estimation
+Maximum Likelihood Estimation	最尤推定，分布(モデル)のパラメータを適合させる
+
+
+<step3>	Multivariate Normal Distribution
+Multivariate Normal Distribution	多次元正規分布，他変数の正規分布，丸のやつ
+
+<step4>	Gaussian Mixture Model, GMM
+GMM			Gaussian Mixture Model，混合ガウスモデル，複数の正規分布を組み合わせたもの
+Marginalization		周辺化，同時確率から特定の確率変数を取り除いて周辺確率を求める
+	周辺確率：単独の確率	contray to 同時確率
+
+sum-logは解析的に解けない，logによる[乗算→加算]ができずに1つの項に複数の確率変数が入り組むから
+
+
+<step5>	EM Algorithm
+KL divergence		Kullback-Leibler divergence，2つの確率分布がどれくらい異なるか
+Evidence Lower BOund	ELBO，下界
+EM Algorithm		EMアルゴリズム，潜在変数を含む確率モデルのパラメータの最尤推定ができる，EステップとMステップを交互に繰り返す，対数尤度に単調増加性
+	Eステップ：Expectation，パラメータを固定し潜在変数の事後分布を計算する
+	Mステップ：Maximization，Eステップの目的関数を最大化する新たなパラメータに更新する
+
+<step6>	Neural Network & PyTorch
+iteration		1epoc完了するために必要な重み更新の回数，データ数/batch
+torch.nn.Parameter	Tensorクラスを継承したクラス，require_grad = True
+torch.nn.Module		自動でtorch.nn.Parameterに記録してくれる
+
+
+<step7>	Variational AutoEncoder
+VAE			Variational AutoEncoder，変分オートエンコーダ，オートエンコーダをNN(変分)にしたやつ
+	Decoder：潜在変数から観測変数への変換
+		1．潜在変数zを正規分布からサンプリングして生成する
+		2．潜在変数zをNNで観測変数xに変換する
+	Encider
+		1．観測変数xからNNを使って平均，分散のベクトルを取り出す
+		2．取り出した平均，分散の正規分布から出力をサンプリングする
+Amortized Inference	償却推論，近似分布のパラメータを1つのNNで計算する手法
+Reparameterizezation Trick	変数変換トリック，微分不可能なサンプリングに式のトリックで誤差逆伝播法を使う
+
+
+<step8>	Hierarchical VAE
+Hierarchical VAE	階層型VAE，マルコフ性で潜在変数を階層化したモデル
+拡散モデル		階層型VAEのエンコーダの正規分布によるノイズを追加する
+	Diffusion Process：拡散過程，ノイズを追加する
+	Reverse diffusion process：逆拡散過程，ノイズを除去する処理
+「ガウスノイズの和もまたガウスノイズになる」→本来Tステップ必要な処理を飛ばせる
+
+
+<step9>	Diffusion Model
+U-net			セマンティック．セグメンテーションのために開発されたモデル
+	セマンティック・セグメンテーション：画像内のピクセルに対してラベルを割り当てるタスク
+正弦波エンコーディング	sin波を使って位置情報をエンコーディングする
+パディング		埋める
+
+
+<step10> Diffusion Model 2
+尤度ベースモデル		定義した確率分布の尤度を最大化する手法			ex) VAE
+スコアベースモデル		対数確率密度関数の勾配(＝スコア関数)を学習する，尤度を最大化する勾配を学習する
+・条件付き拡散モデル
+分類器ガイダンス		どんな画像を生成するかを外部の分類器を使ってコントロールする
+分類器なしガイダンス	クラスらしさ-画像らしさの差分ベクトルを足す
+・Stable Diffusion
+潜在空間			VAEを使って画像(ピクセル空間)を潜在空間に次元数を少なくして変換し拡散過程を行う
+CLIP			テキストをベクトルに変換するNN，画像エンコーダとテキストエンコーダの類似度を高くするように学習されてる
+Attention		中間データと条件をCross-Attentionし入力する

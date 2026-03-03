@@ -1,0 +1,34 @@
+{
+    "description": "Right Command Input Method Switching",
+    "manipulators": [
+        {
+            "from": {
+                "key_code": "spacebar",
+                "modifiers": {
+                    "mandatory": ["right_command"]
+                }
+            },
+            "to": [
+                {
+                    "select_input_source": {
+                        "input_source_id": "com.apple.keylayout.ABC"
+                    }
+                }
+            ],
+            "type": "basic"
+        },
+        {
+            "from": {
+                "key_code": "right_command"
+            },
+            "to_if_alone": [
+                {
+                    "select_input_source": {
+                        "input_source_id": "com.google.inputmethod.Japanese.base"
+                    }
+                }
+            ],
+            "type": "basic"
+        }
+    ]
+}
