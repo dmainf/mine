@@ -1,0 +1,54 @@
+<command>
+
+find -name '<file>'：全部から探す
+
+base64 -d <file>：base64でデコードする
+uudecode <file>：UUdecodeでデコードする
+echo <str> | tr <str1> <str2>：<str1>を<str2>に置換する
+	-d <str1>：<str1>を削除する、空白消すとかもできる
+
+binwalk <file>：<file>に含まれる可能性があるファイルを表示する
+	-e：自動抽出する
+	-M：再帰的に解析する
+whois <dmain/ip>：ドメイン名・IPアドレスの登録情報を見る
+foremost <file>：ヘッダー・フッターから削除された・破損したファイルを復元する
+
+awk '<条件>' <file>：テキストファイルを処理する
+	-F '<str>'：フィールドの区切り文字を指定する
+		ex)awk -F ',' '{ print $2 }' file.csv
+
+sort | uniq <file>：重複行を削除する
+	-c；カウントして表示する
+
+sha256sum <file>：SHA256でエンコードする
+dirb <URL>：配下のファイル、ディレクトリを検索する
+
+stat <file>：ファイルのステータス(最終変更日時とか)を表示する
+ssdeep -db *：同じディレクトリ内の似ているファイルを検出する
+※ファイルの一部がわずかに変化するとハッシュ値が大きく変わる性質を攻略できる
+
+readelf	：ELFファイルの詳細の情報を表示する
+	-h：ヘッダ情報を表示する
+
+hashcat -m 0 -a 0 hash.txt word.txt'
+/home/dmainf/john/run/john --format=raw-md5　--wordlist=rockyou.txt hash.txt：John The Ripperでハッシュ化された文字列を解析する
+
+=====================================================================
+
+curl -i --cookie "admin=true" http://34.170.146.252:6407/
+
+
+wget <URl>：ダウンロードできる
+
+curl -X POST http://192.168.6.100:10004
+
+
+=========================================================================
+
+alias ....='../../..'
+Ctrl+l：カーソルを1行目にする
+Ctrl+w：1単語ずつ消す
+Ctrl+k：カーソルより右側を消す
+
+コマンドを打った途中に
+Ctrl+P/N：途中までに合致するコマンドをhistoryからできる

@@ -1,0 +1,130 @@
+<?php
+
+phpにHTMLを書きたいときは'<html>'で普通に書ける
+
+foreach(<array> as <key> => <val>)
+
+include <file>：ファイルが見つからない場合、警告は出すが処理は続く
+require <file>：ファイルが見つからない場合、エラーが発生してプログラムが止まる
+include_once <file>：includeと同じ動作をするが、再読み込みをしない
+require_once：requireと同じ動きをするが、再度呼び込みをしない
+
+file_get_contents("<fp>")：ファイルポインタを読み込み文字列として返す
+nl2br(<str>, false)：改行コードを<br>に置き換える
+file_put_contants("<file>", <content>)：ファイルに書き込む※fopen(). fclose()必要ない
+
+fopen("<file>", "<option>")：ファイルポインタを返す
+	r：読み
+	r+：読み＋書き、ファイルがない場合false
+	w：書き
+	w+：読み＋書き、ファイルがない場合作る
+	a：追記
+	a+：読み＋追記
+fgets(<fp>)：1行だけ読み込む
+fclose(<fp>)：閉じる
+fwrite(<fp>, <content>)：書き込む
+
+file(<fp>)：ファイルの中身をすべて配列に格納する
+feof(<fp>)：ファイルの終端ならtrue
+count(<fp>)：ファイルの行数を数える
+
+$_GET['<key>']：スーパーグローバル変数を連想配列として定義
+$_POST['<key>']：HTMLからデータを受け取る
+
+isset(<val>)：値があればTRUEを返す
+unset(<val>)：変数が消える、NULLも値が入っているという意味
+intval(<val>)：整数を返す
+
+is_uploaded_file(<file>)：正しい手順でアップロードされていればTRUEを返す
+move_uploaded_file(<file1>, <file2>)：file1からfile2に移動させる
+
+$_FILES['<key>'][<type>]
+	name：ファイル名
+	type：ファイルの種類、MIMEタイプ
+	tmp_name：テンポラリフォルダでのファイル名
+	error：エラーコード
+	size：ファイルサイズ
+
+getimagesiza(<file>)：
+	0 => 幅 (ピクセル)
+	1 => 高さ (ピクセル)
+	2 => 画像タイプ (整数, 例: IMAGETYPE_JPEG)
+	3 => HTMLで使える幅と高さの属性文字列 (例: 'width="100" hight="200"'),
+	'mime' => MIMEタイプ (例: 'image/jpeg')
+date()：Y, nとか
+
+mt_rand(<min>, <max>)：minからmaxまでの乱数を出力、mt_rand()もいける
+
+header('Location: <URL>');URLに移動する
+opendir(<dir>)：ディレクトリを開き、ディレクトリハンドルを返す
+readdir(<dirhandle>)
+closedir(dir)
+
+$db= new PDO(<dsn>, <user>, <password>)：PHPとDBMSの間に抽象レイアを挟む
+$db->setAttribute(PDO:ATTR_EMULATE_PREPARES, false)：PDOへの設定を施す
+$stmt=$db->prepare("：プリペアドステートメントを作成する
+	insert into <table> (name, title, body)
+	values (:name, :title, :body)"
+)
+$stmt=->bindParam(':name', $name, PDO:PARAM_STR)：プレースホルダに値を埋め込む
+$stmt->execute()
+
+ceil(<num>)：端数切り上げ
+array_chunk(<array>, <num>)：num個に分割する、次元が1つ増える感じ
+preg_match("/<str>/", <val>)：正規表現パターンかを調べる
+<条件式>? <式1> : <式2>：3項演算子、条件式がTRUEなら式1、FALSEなら式2を返す
+
+setcookie('name', $name, time() + 60*60*24*30)：ブラウザにクッキーを発行して制限時間を設定し保存させる
+クッキー：ブラウザに保存する
+セッション：サーバに保存する
+$_COOKIES[]：クッキーのスーパーグローバル変数
+$SESSION[]：セッションのスーパーグローSバル変数
+※$_SESSIONの中身を削除する場合 $_SESSION=array(); でいける
+
+htmlspecialchars(<val>, ENT_QUOTES, 'UTF-8')
+<input type="hidden" name="token" value="<?php echo hash("sha256", session_id()) ?>">：クロスサイトリクエストフォージェリを対策するためにトークンをサーバで発行する
+※$_POST['token']に格納される
+if ($token != hash("sha256", session_id())){
+  header('Location: bbs.php');
+  exit();
+}
+でおけ
+session_regenerated_id(true)：セッションIDを再作成する
+
+getimagesizes()：ファイルのサイズを返す
+imagecreatetruecolor()：キャンバス作成する
+imagecreatefromjpeg()：画像のリソースを取得する
+imagecopyresampled()：画像の縮小をする
+imagejpeg()：保存する
+
+・実装時はドキュメントの外にファイルを置きURLで直接指定することで情報の漏洩を防げる
+
+・プロパティからファイルの権限を変更できる
+
+・salt：ディクショナリ攻撃の対応するためにパスワードに独自の文字列(salt)と追加してハッシュ化する
+
+・フレームワーク：アプリケーションのよくある処理を備えたもの ex)Laravel
+?>
+
+
+<html>
+
+<a href="<URL>" target="_blank">TEXT</a>：新規タブでTEXTにURLをつける
+
+<img src="file" alt="" title="">
+
+<form action=<送信先URL：プログラム名とかいける> method="post" enctype="<multipart/form-data>"> </form>：送信する部分と送信先を指定する
+<input type="<type>" name="<key>" value="<value>">：入力フォームを作成する
+	:text
+	:radio
+	:file
+	:submit
+<select name="<key>">：プルダウンメニュー
+	<option value="<value>"></option>
+</select>
+<textarea name="<key>"></textarea>：テキストエリア
+
+intval(<val>)：整数に変換する
+
+
+</html>

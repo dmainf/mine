@@ -1,0 +1,54 @@
+お役立ち情報をいくつか共有します。
+のちほど、ご覧ください。
+
+【講師】長谷川  から  全員 1:16 PM
+【主なコンテスト】
+（SECCON以外、学生が参加できる、定期開催のもの）
+※ 企業単独で行っているもの（リクルート目的、ビジネス目的の可能性のあるもの）は除いています。
+ 
+・若年層向け「全国型CTFコンテスト」
+https://www.soumu.go.jp/soutsu/kinki/01sotsu07_01002261.html
+※    次回、来年秋頃。参加はほぼ学生。
+ 
+・防衛省サイバーコンテスト
+https://www.mod.go.jp/j/approach/defense/cyber/c_contest/index.html
+※    次回、来年2月頃。
+ 
+・情報危機管理コンテスト
+https://sccs-jp.org/symposium29/cmc20/cmc/
+※    次回5/22～24。現在、申し込み受付中。学生のみ
+ 
+なお、高専生のみですが、今年も秋～冬に「KOSENセキュリティコンテスト2025」をハイブリッド形式で開催予定。
+
+【講師】長谷川  から  全員 1:17 PM
+【主なイベント】（学生向け）
+・セキュリティ・キャンプ
+https://www.security-camp.or.jp/
+
+・SecHack365
+https://sechack365.nict.go.jp/
+
+・P3NFEST
+https://issuehunt.jp/events/2025/winter/p3nfest
+※ 次回未定
+【主なコミュニティ】（学生が参加できる/している）
+・WEST-SEC
+https://west-sec.connpass.com/
+ 
+・総サイLT
+https://sec-kansai.connpass.com/
+ 
+・大和セキュリティ
+https://yamatosecurity.connpass.com/
+ 
+・塩尻サイバーセキュリティ勉強会
+https://shiojiri-cyber.connpass.com/
+ 
+・Security-JAWS
+https://s-jaws.connpass.com/
+
+・LCL－Tokyo
+https://www.lcl-tokyo.org/
+女性のためのITコミュニティ
+
+以上。

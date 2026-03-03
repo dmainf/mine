@@ -1,0 +1,121 @@
+ifconfig：IPアドレスを表示する
+shutdown -h now：シャットダウンする
+su - <user>：ユーザーに切り替える
+http://<IPaddress>：Webサーバーが動いているか確認する
+ftp://133.78.113.158
+http://サーバの IP アドレス/~ユーザ名/ファイル名
+
+grep <option> <str> <file>：ファイルからstrをを検索する
+	-v：strが含まれていない行を出力する
+	-i：大文字・小文字の区別をしない
+	-a：バイナリをテキストとして扱える
+※^：行頭
+※$：行末
+→grep ^a <file>：aから始まる行を出力する←a*と違ってディレクトリもいける
+※ディレクトリから探したいときはls | grep <str>
+
+xargs -I {}：{}に入力を格納する
+例)ls | grep A* | xargs -I {} mv {} /tmp
+
+sort <option> <file>：辞書順にソートする
+	-r：逆順
+	-n：文字を数値と見なす
+	-f：大文字・小文字を区別する
+	-k <num>：空白で列を区切ったときのnum番目の文字列
+head -<num> <file>：先頭からnum行を表示
+tail -<num> <file>：末尾からnum行を表示
+
+find <dir> -name '<file>'：ファイルがあれば表示する
+
+
+id：ユーザーを表示する
+※/etc/groupにグループ情報ある
+usermod -G <group> <user>：副グループを初期化
+	-gで主グループを初期化
+chown <user> <file/dir>：ファイル・ディレクトリの所有者を変更する
+chgrp <group> <file/dir>：ファイル・ディレクトリのグループを変更する
+usermod -G <group> <user>：ユーザーを副グループに追加する
+
+ps：サーバ上で動作しているプロセスを確認する
+	ps aux：all userを表示する
+※USER: プロセスの所有者（ユーザー名）
+※PID: プロセスID
+※%CPU: CPU使用率
+※%MEM: メモリ使用率
+※VSZ: 仮想メモリサイズ
+※RSS: 実際に使用中のメモリサイズ
+※TTY: プロセスが関連付けられている端末
+※STAT: プロセスの状態（R=実行中、S=スリープ中など）
+※START: プロセスが開始された時刻
+※TIME: 累積CPU時間
+※COMMAND: 実行されたコマンド名
+
+ping <ip address>：指定したIPアドレスの機器と通信可能かどうか確認する
+
+netstat：アクティブになっているコネクションを表示する
+	-at：TCPポート
+	-au：UDPポート
+	-l：接続を受け付けるコネクション
+	-n：ルーティングテーブル
+netstat -i：ネットワークインターフェースごとの通信の統計情報
+※RX：受信
+※RK-OK：正しく受信
+※RK-ERR：エラーになった受信パケット
+※RK-DRP：破棄された受信パケット
+※T*は送信
+
+systemctl restart vsftpd：サーバーを再起動する
+
+ftpコマンド集 ※プロンプトを操作してる方がクライアント
+	quit :  ftpコマンドを終了する．
+	ls :  サーバ上のファイルを確認する
+	※普通にls -aとかオプションつけれる
+	cd :  サーバ上のカレントディレクトリを変更する
+	binary :  転送を行うときに，変更なしでそのまま行うモードにする特別な意図がない限り指定する）
+	put :  クライアントにあるファイルをサーバに転送する
+	get :  サーバにあるファイルをクライアントに転送する
+	pwd : サーバ上において，現在いるディレクトリを確認する
+	cd : サーバ上において，現在いるディレクトリ位置を変更する
+	!ls : クライアント上の現在いるフォルダの位置や，そのフォルダ中のファイルの情報などを確認する
+	lcd : クライアント上において，現在いるフォルダ位置を変更する
+	mput : クライアントにある複数のファイルをサーバに転送する 
+	mget: サーバにある複数のファイルを転送する
+
+	ワイルドカード：
+	*：文字の連続
+	?：任意の１文字
+
+scp <file> <username>@<IPaddress>:<newfile>：SSHを利用してファイルをコピーする
+wget <URL>：指定したURLのファイルをダウンロードする
+
+mysql -u <user> -p：パスワードを入力してMySQLに入る
+MySQL commands:
+	create database <db>：データベースを新規作成する
+	show databases：データベースの一覧を表示する
+	drop database <db>：データベースを削除する
+	revoke all on *.* from '<user>'@'localhost'：ローカルの<user>から権限を剥奪する
+	drop user '<user>'@'localhost'：ユーザを削除する
+	select user from MySQL.user;：登録されているユーザを問い合わせる
+	flush privilleges：リフレッシュする
+
+ln -s <file> <link>：シンボリックリンクを作る
+
+tar cvfz <file>.tgz/.tar.gz <file1>, <file2>：file1, 2を			file.tgz/.tar.gzというgzipファイルにまとめる
+tar tvfz <file>：作成したgzipファイルを確認する
+tar xvfz <file>：fileを展開する
+
+lsblk：ディスクの状況を確認する
+df：ディスクの使用量を確認する
+du <option> <dir>：ディレクトリごとのディスクの使用量を確認する
+	-h：単位をつける
+	-s：指定ディレクトリだけ表示する
+※duだけでカレントディレクトリもいける
+
+w：現在のログイン状態がわかる
+last：いままでのユーザ履歴を確認する
+
+arp：ARPテーブルを確認する
+
+a2enmod userdir：userdirをWebサーバが起動する際に読み込む
+a2dismod：既に設定されているモジュールの読み込みを解除する
+a2enconf <file.conf>：

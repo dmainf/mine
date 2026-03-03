@@ -1,0 +1,24 @@
+＜ビジネスインダストリ＞
+
+アグリゲーションサービス：複数の企業のオンラインサービスを集約する
+組み込みシステム：内部に組み込まれたやつ
+
+スマートグリッド：通信で電力需要を制御し省エネにする
+XBRL：eXtensible Business Reporting Language、財務報告を記述するための規格
+
+ファインチューニング：機械学習を特定のタスクに調整する
+EDINET：Electronic Disclosure for Investor's Network、有価証券報告書類をWeb上で閲覧できるシステム
+PLM：Product Lifecycle Manegement、廃棄まで管理する
+情報銀行：個人データを管理し提供する事業者
+
+セル生産方式：1人屋台方式
+フィルターバブル：インターネットで情報がパーソナライズされる
+MRP：Materials Requirements Plannig
+PDM：Product Data Management
+
+VICS：Vihicle Information and Communication System、道路の交通状況
+ギグエコノミー：インターネット上の単発の仕事で稼ぐ
+スマートコミュニティ：再生可能エネルギ‐を使うようにする
+
+3PL:在庫管理や輸送を第三者企業に任せる
+EDI：Electronic Data Interchange、企業間の受発注を電子でやる

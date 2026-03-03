@@ -1,0 +1,280 @@
+<<pwn>>
+脆弱性見つけエクスプロイトし，シェルを奪取・フラグ読み出しをする
+
+0:ソースコードがある場合、chall.cを読む。
+1:「file chall」でどのような実行ファイルかを見る。
+2:「checksec　chall」 でセキュリティ機構を眺める。
+3:「chmod 755 chall」でchallを実行できるようにし、実際に実行してみる。
+4:「strace chall」や「ltrace chall」で実行ファイルの雰囲気を感じ取る。
+5:「objdump -d chall」 で逆アセンブルをしてどんなプログラムなのかを感じる。
+6:  3で結果が巨大な場合はIDAで解析してみる。
+7:「gdb -q chall」で実行ファイルを動かしながら解析してみる。
+8: ans.pyなどのpythonのファイルを作り、pwntoolsで問題を解くスクリプトを書く。
+9: ans.pyを実行しサーバー上でシェルを奪う。
+
+＜pwntoolsの基礎＞
+conn.sendline(payload)で改行付きで送信
+conn.recvuntil(“hoge”)：hogeが受信されるまでデータを受け取る
+p64(num)でnumをリトルエンディアン形式に変換  (x64)
+
+p32(elf.plt['printf'])：PLTのprintfのアドレス：
+p32(elf.got("exit"))：GOT領域内のexitのアドレス
+
+line=sock.recvline().strip()：
+mainaddr=line.split(b": ")[1]
+
+shellcode=b'\x31\xc0\x50\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\x50\x53\x89\xe1\xb0\x0b\xcd\x80'
+
+
+＜execve関数＞：/bin/shを立ち上げる関数
+
+int execve(const char *pathname, char *const _Nullable argv[], char *const _Nullable envp[]);
+	第1引数：/bin/sh
+	第2引数：0
+	第3引数：0
+	rax=59※x86-64の場合
+
+
+
+
+
+＜ROP＞：Return-Oriented Programming，ret命令でpopされるスタックの値をret命令を含む命令片のアドレス(gadget)に書き変える
+→gadget(pop N; ret)を上手く使う
+(＝リターンアドレスにgadgetのアドレスをセットする)
+
+複数の関数を呼び出すとき引数の設定やスタックポインタの調整が難しい
+→gadgetが前に使った関数の引数をpopしてespの調整をする
+※引数分popする必要がある
+
+NXbitが有効で自作のシェルコードを実行できない
+→すでに実行可能なgadgetならNXbit回避できる
+
+↓・・・
+↓関数Aの引数
+↓gadgetのアドレス
+	pop edi
+	ret
+↓関数Aのアドレス
+
+1．ret(=pop eip)で関数Aのアドレスをpop
+	関数A処理
+2．ret(=pop eip)でgadgetのアドレスをpop
+	gadget処理
+3．Nに関数Aの引数をpop
+4．gadgetのret(=pop eip)命令でeipにgadgetのリターンアドレスをpop
+	処理
+5．eipにスタックトップの値(未定)をpop
+
+※gadget：ROPで使える命令片
+	pop	N(edi/ebx etc...)
+	ret
+※ROPgadget --binary chall | grep pop で見つけられる
+※ropper -f chall --search "pop rdi"
+
+・いい感じのgadgetが見つけられないとき
+→libcから見つける
+※libc内のアドレスは相対アドレスだからIDAで.got領域を見て__libc_start_mainのアドレスを探す
+
+
+
+※2つの関数を呼び出す場合
+↓・・・
+↓関数Bの引数2
+↓関数Bの引数1
+↓gadget2のアドレス
+	pop eax
+	pop ecx
+	ret
+↓関数Bのアドレス
+↓関数Aの引数1
+↓gadget1のアドレス
+	pop ebx
+	ret
+↓関数Aのアドレス
+
+
+※pop rdi; ret：機械語で書くと 5f c3
+
+
+＜Return to PLT＞
+・PLT→GOT→関数実行
+・「call」で呼び出し，「ret」で戻る
+
+1．引数を積む
+2．リターンアドレスを積む
+2．前回のリターンアドレスからeipを取り出す
+	3．ebpを退避させる
+	4．スタックを拡張する
+		処理
+	5．leave命令で前の状態を復元する
+	6．ret命令で復帰する「ret = pop eip」
+7．拡張したスタックをを収縮させる
+
+
+・スタックの状況
+↓・・・
+↓引数2
+↓引数1
+↓リターンアドレス				←callで積む
+↓関数のアドレス(前の関数のリターンアドレス)	←retで呼び出す
+↓退避されたebp
+↓ローカル変数
+
++=オフセット(ローカル変数とebp)
++=呼びたい関数のアドレス
++=リターンアドレス
++=引数1
++=引数2
+
+の順で書けばいい
+
+readelf -s：グローバル変数のアドレスを見れる
+
+＜Return to libc＞
+
+
+＜ASLRの回避＞
+1．ブルートフォース
+2．
+
+	＜1．ブルートフォース＞
+
+
+・ランダム化されるビット数
+
+	32bit	64bit
+----------------------
+stack	11bit	20bit
+mmap	8bit	28bit
+heap	13bit	13bit
+
+※mmap：共有ライブラリを呼び出すやつ
+
+ldd <file>：共有ライブラリが配置されるメモリアドレスを表示する
+※ASLRが有効な場合ランダム
+
+nm -D：動的シンボルテーブルを見る
+strings -tx 
+
+※system関数 | /bin/sh ←libc内の固定アドレスに存在する
+→相対アドレスで行けそう
+
+socat TCP-LISTEN:4000,reuseaddr,fork EXEC:./bof4
+
+
+＜GOT Overwrite攻撃＞：フォーマットストリング攻撃でGOT領域を書き込みeipを奪う
+※ライブラリが動的リンクされていてNo RELRPかPartial RELRPのとき有効
+(＝GOT領域を書き込めるとき)
+GOT領域：ライブラリの関数アドレスを保存する領域
+
+1．任意のアドレスのデータを読み取る
+2．任意のアドレスにデータを書き込む
+3．GOT領域を書き換えて、system関数を使ってシェルを取る
+
+	＜1．任意のアドレスのデータを読み取る＞
+	1：「AAAA%p,%p,%p,%p,%p,%p,%p,%p」で入力した文字列が何番目のパラメータの出現するか確認する
+	2：readelf -s / nm で読み取りたい変数のアドレスを調べる
+	3：<アドレス>%<何番目>$sで読み取る
+	※ダイレクトパラメータアクセス：%<n>$<型>：n番目の値を<型>で表示する
+
+	＜2．任意のアドレスにデータを書き込む＞
+	1：<書き込みたいこと>%<何番目>$nで書き込む
+	※%nはこれまで出力された文字数を書き込む
+
+	＜3．GOT領域を書き換えて、system関数を使ってシェルを取る＞
+	1：文字数でいい感じにやる
+
+
+＜フォーマット指定子＞
+%p：void*型で16進数で表示する，スタック上の値を直接扱う
+%s：char*型で表示する，スタック上の値をアドレスとして扱う
+
+%n系：ポインタ型の引数にそれまで出力した文字数を書き込む
+	%n：4バイト
+	%hn：2バイト
+	%hhn：1バイト
+
+
+・eip(rip)を奪う：プログラムの実行位置(IP)を自由に変更できる状態
+
+
+＜関数のアドレスを知るには＞
+・静的なシンボルテーブル上から読み込まれる関数を見る	readelf -r <func>
+(＝nm / readelf -sで見れるやつ ex)printf )
+
+・動的ライブラリから読み込まれる関数を見る		gdb -q -> p <func>
+(＝ASLRの影響を受ける ex)system関数 )
+
+※.symtab：シンボルテーブル
+※.dynsym：動的シンボルテーブル
+※readelf --dyn-syms / nm -Dで動的シンボルテーブルを見れるがアドレスやメモリ状態はわからない
+
+
+＜リターンアドレス＞
+x86-64		→8バイト
+x32		→4バイト
+
+※x86-64：64ビットのx86アーキテクチャ，x86の86はただのIntel8086プロセッサの86から来てる
+
+
+
+＜command＞
+sudo sysctl -w kernel.randomize_va_space=0：ASLRを無効化する
+※space=2で有効化
+gcc -m32 -fno-stack-protector -o bof2 bof2.c：32bit/SSPを無効化してコンパイルする
+	-z execstack：NX bitを無効化してコンパイル
+echo -e：エスケープシーケンス(バックスラッシュで始まる特殊文字)を解釈・展開する
+	ex)\n
+readelf：ELFファイルの情報を表示するコマンド
+	-h：ヘッダ情報
+	-r：リロケーション情報を表示する，オフセットを知りたいときに使う
+	-s：シンボルテーブルの情報を表示する
+
+※リロケーション情報：コンパイルで決定できなかったアドレス情報を実行時に正しく修正するための情報
+
+ldd :共有ライブラリを表示する
+
+
+＜gdb command＞
+pattc 50：パターン文字列を生成する
+patto AABB：パターン文字列の何文字目にstrがあるか表示する
+	※パターン文字列：連続して繰り返しにならない一意な文字列
+p/x &slot：アドレス・戻り値の型．引数の型を16進数で表示する
+※/x：16進数で表示
+
+
+＜tips＞
+RELRO：RE Location ReadOnly，どの部分にReadOnly属性をつけるか決定する
+SSP：Stack Smash Protection，canaryという値を挿入する
+→バッファオーバーフローを防ぐ
+NX bit：No eXecute bit，実行する必要のないデータを実行不可能にする
+→シェルコードによる攻撃を防ぐ
+ASLR：Address Space Layout Randomization，メモリを配置するときアドレスの一部をランダムにしてアドレスの予測を困難にする
+PIE：Position Independent Executable，アドレス参照をすべて相対アドレスで行う
+
+ROP：Return Oriented Programming，NX bitが有効でも実行可能な部分からgadgetのコード片を収集し上手く繋げるプログラミング
+	ex)popret gadget
+
+→「ret;」で終わる命令を連鎖させて複数の関数を呼ぶ
+
+gadget：「ret;」で終わる命令列
+
+PLT：Pricedure Linkage Table，ELF形式のファイルに組み込まれているジャンプテーブル，外部ライブラリ(libcとか)の関数を呼び出すときの仲介役
+ret2PLT：eipを奪ったあとPLTの関数を自由に実行できるようにする
+
+libc：prinfなどが定義されている標準ライブラリ
+ret2libc：動的にライブラリをリンクしているからASLRの影響を受ける
+
+
+＜environment＞
+checksec.sh：実行ファイルが備えているセキュリティ機構を表示するシェルスクリプト
+peda：gdbの機能を強化する拡張スクリプト
+	pdis pdissassemble
+	ropgadget
+	pattern
+	vmmap
+rp++：実行ファイル中に存在するROP Gadgetを表示する
+↑使えないからROPgadgetを使う
+socat：リモートエクスプロイトを手元で再現するツール
+	 ex) socat TCP-LISTEN:4000,reuseraddr,fork EXEC:".binary":4000番ポートでbinaryを立ち上げる
+pwntools：簡単にリモートサーバに接続できる

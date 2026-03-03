@@ -1,0 +1,8 @@
+PEview：PEファイルのPE情報を見れる
+ProcessMonitor：プロセスを全部見れる、treeだと見やすい
+
+FTKImager：メモリダンプ・ディスクイメージを見れる
+jadx-gui：.apkのファイルを逆コンパイルして表示できる
+Autoruns：システムで自動起動されるのを一覧表示し，オン・オフ・削除できる
+
+Ghidra：逆アセンブル・デコンパイルツール，create new project and push green Dragon!!

@@ -1,0 +1,31 @@
+＜gdb＞
+n：ステップオーバー
+s：ステップイン
+	外に出るには
+	・n/sでreturnまでいく
+	・fin
+
+i regis：レジスタを見る
+
+la asm/regs
+※Ctrl+x+a で終了
+
+help <command>
+Enterで直前と同じコマンドを実行できる
+
+
+＜pwntool＞
+p64(elf.symbol("win"))：win関数のアドレス
+sock.sendlineafter("Size: ", b'')：Sizeは入力されたら送信する
+
+
+rabin2
+	-i：シンボルテーブルを表示する
+	-z：ASCII文字列を抽出する
+
+＜command＞
+ldd file：共有ライブラリを見る
+
+
+INT_MAXに-1を書けてもINT_MINになる
+※INT_MIN：-2147483648，-0x80000000

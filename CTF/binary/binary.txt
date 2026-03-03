@@ -1,0 +1,230 @@
+<<binary>>
+表層解析から得られた情報を基に実行環境を用意し、動的解析・静的解析をする
+
+・トレースすることでバイナリの大まかな挙動を知ることができる
+・実行制御と実行状態監視の繰り返しによってデバッギーの情報を得る
+・はじめはレジスタウィンドウとスタックウィンドウを中心に監視する
+
+・静的リンクかつstrippedなバイナリは解析が難しい
+※標準ライブラリ関数とユーザ定義関数の命令列が同じバイナリに存在し、見分けがつかないから
+
+・逆コンパイラに頼りすぎるとアセンブリが読めなくなりバイナリ解析能力が落ちる
+→アセンブリを手動で逆コンパイルすると良い
+
+＜トレース＞
+strace	：システムコール(＝プロセスIDの取得 を追跡する
+	-f：子プロセスのみを追跡できる
+	-i：IPを表示する
+ltrace	：ライブラリコール(＝標準ライブラリ関数呼び出し を追跡する
+＜逆アセンブラ＞
+objdump -d -M intel：実行可能セクションの逆アセンブルをintel記法で表示する
+
+＜表層解析＞
+file	：ファイルの種類を調査する
+readelf	：ELFファイルの詳細の情報を表示する
+	-h：ヘッダ情報を表示する
+
+＜デバッガ＞
+ステップイン(関数の中身まで解析したい)：call命令の呼び先のサブルーチンにもステップ実行する
+ステップオーバー：サブルーチンの呼び出しを1命令と捉えてステップ実行する
+
+
+<アセンブリ>：アセンブリ命令＝オペランド＋オペコード
+・プログラムは主に条件分岐、API呼び出し、演算命令の組み合わせによる複雑なアルゴリズムの3要素
+・呼び出し規約：アセンブリ言語中のサブルーチンにおける引数の渡し方、返り値の返し方を定めた規約
+
+動的リンク：外部のライブラリファイルを実行時に動的にリンクする
+静的リンク：外部のライブラリファイルをコンパイル時にリンクし、生成する実行ファイルに含める
+
+＜gdb＞
+gdb <file>：gdbデバッグ開始
+	-p：実行中のファイル
+disas <function name>：関数を対象に逆アセンブル
+	引数を保つ場合→disas <start addrss> <end address>
+	※非省略形 disassemble <function name>
+x/ <num of ope> i <start address>：関数に含まれていない領域を逆アセンブル
+
+set disassembly-flavor (intel/att)：Intel記法/AT&T記法にする
+
+b <function name>/<address>：ブレークポイントをセットする
+	※非省略形 break <function name>/<address>
+i b：ブレークポイントの状態を表示する
+	※非省略形 info break
+d <break point num>：ブレークポイントを削除する
+	※break point num is the num is check by i b command
+	※非省略形 delete <break point num>
+disable <break point num>：ブレークポイントを無効化する
+enable <break point num>：無効になっているブレークポイントを有効化する
+ignore <break point num> <num of ignoring>：決まった回数通過するまで無効化する
+
+r：ブレークポイントor最後まで実行する
+	コマンドラインに引数を渡す場合→r <arg1> <arg2> ...
+	※非省略形 run
+start：main関数でブレークさせる
+	コマンドラインに引数を渡す場合→r <arg1> <arg2> ...
+set args <arg1> <arg2> ...：コマンドライン引数をあらかじめセットできる
+set <register name>=<value>：レジスタに値をセットする
+
+ni：ステップオーバーで命令を実行する
+	※非省略形 nexti
+si：ステップインで命令を実行する
+	※非省略形 stepi
+c：次のブレークポイントまで動作を継続する
+	※continue
+
+p <register name>：レジスタの値を読み出す
+i r：すべてのレジスタの値を読み出す
+	※非省略形 info registers
+
+x/<num><size><format> <address>：メモリの内容を表示する
+	size of data：
+		b：BYTE		(1バイト)
+		h：HALFWORD	(2バイト)
+		w：WORD		(4バイト)
+		g：GIANTWORD	(8バイト)
+	format：
+		s：文字列
+		i：命令
+		x：16進数
+ex) x/100wx *0x4010000：0x4010000のアドレスから4バイト単位で100個のメモリを16進数で読み出す
+
+bt：コールスタックのバックトレースを確認する
+	※非省略形 backtrace
+
+watch <address of memory>：指定したメモリに書き換えがあった場合ブレークする
+	rw：読み取り		※非省略形 rwatch
+	aw：読み書き両方	※非省略形 awatch
+
+
+＜ファイル＞
+LSB：Least Significant Byte＝リトルエンディアン
+not stripped：実行ファイル内のシンボル情報が残っている
+stripped：シンボル情報が削除されたバイナリ
+※シンボル情報：関数名やアドレスなどを示したもの
+nm <実行file>：シンボル情報を表示する
+strip <file>：不要なシンボル情報を削除する
+
+Intel記法：
+	mov dest, src：srcオペランドの値をコピーする
+	lea dest, src：srcオペランドのアドレスをロードする
+	xchg dest1, dest2：オペランドを交換する
+	lodsb：1バイト分ESIのメモリをALレジスタに読み込む
+	stosb：1バイト分ALレジスタの値をEDIに書き込む
+
+	push src：argオペランドの値をスタックにpushする
+	pop dest：スタックからargオペランドへpopする
+
+	add/sub dest, src：加算/減算して格納する
+	mul：EAXレジスタの値を乗算する、上位4バイトをEDXレジスタ、下位4バイトをEAXレジスタ格納する
+	div src：EAXレジスタの除算する、商をEAXレジスタ、余剰をEDXレジスタに格納する
+	inc/dec dest：destオペランドの値をインクリメント/デクリメントする
+	cmp src1, src2：減算し結果を破棄する、フラグレジスタの値を変化させることで条件分岐を作れる
+	
+	shr/shl dest, count：countオペランドで指定したビット数分左/右にビットシフトして格納する
+	ror/rol dest, count：destオペランドをcountオペランド数分ローテートして格納する
+	xor dest, src：排他的論理和を取り格納する、初期化されるのによく使われる(同じ値の排他的論理は0だから)
+	test src1, src2：論理積を取り結果を破棄する、フラグレジスタの変化が目的
+
+	jmp arg：実行をargオペランドに分岐させる
+	call arg：実行をargオペランドに分岐させ、分岐先のアドレスを戻り先のアドレスとしてスタックに格納する
+	ret：call元の次の命令に実行を戻す、。pop eipと同じ
+	leave：データ転送命令、retの前に呼び出されスタックポインタをベースポインタと同じ位置の戻しスタックに保存していた呼び出し元の関数のベースポインタを復元する
+	※leave=mov esp, ebp; pop ebp;
+
+	※オペランドのサイズを明示するとき，命令のあとにサフィックスを付ける
+
+＜レジスタ＞：プロセッサ内に存在する記憶装置
+
+	R：64-bit
+	E：32-bit	
+
+	汎用レジスタ：この通りに使われないこともある
+		A,B,C,Dレジスタ：
+			EAX(Accumulator eXtended)：演算結果を記憶する
+			EBX(Base eXtended)：アドレスのベース値を記憶する
+			ECX(Counter eXtended)：カウントを記憶する
+			EDX(Data eXtended)：演算に用いるデータを記憶する
+		インデックスレジスタ：相対的な指標
+			ESI(Source Index)：データの転送元を記憶する
+			EDI(Destination Index)：データの転送先を記憶する
+	特殊レジスタ：
+		ポインタレジスタ：セグメントレジスタのオフセットアドレス
+			ebp(Base Pointer)：スタックベース記憶する
+			esp(Stack Pointer)：スタックトップを記録する
+		命令ポインタレジスタ：
+			eip(Instruction Pointer)：命令のアドレスを記憶する
+
+コールスタック：スタックの別名
+スタックフレーム：特定の関数で使われるスタック領域 ex)引数，戻り値アドレス，ローカル変数
+
+＜バイトオーダ＞
+MSB：Most Significant Byte，マルチバイトのデータの中で最上位のバイト
+LSB：Least Significant Byte，マルチバイトのデータの中で最下位のバイト
+
+＜基本コマンド＞
+strings	：表示可能文字列を表示する
+grep	：マッチした行を抽出する
+圧縮ファイルの解凍
+	.zip : unzip
+	.tar.gz : tar zxvf
+	.gz : gunzip
+	.xz xz -d
+
+Jcc命令：条件分岐を実現する命令群
+	JE命令/JZ命令：ZF=1のときに分岐
+	JNE命令/JNZ命令：ZF＝0のときに分岐
+	JG命令：ZF＝0かつSF=OFのときに分岐
+	JL命令：SF<>OFのときに分岐
+
+EFLAGS(フラグレジスタ)：プロセッサの状態を保持する
+	CF：
+	ZF
+	SF
+	DF
+	OF
+セグメントレジスタ：セグメントの先頭のアドレスを格納する
+	CS
+	DC
+	SS
+	ES
+	FS
+	GS
+fork()：現在のプロセスを複製し、新しい子プロセスを作成する
+
+例)
+pid = fork();
+if(pid > 0) {
+//親プロセス
+} else if(pid == 0) {
+//子プロセス
+} else {
+//エラー
+}
+
+
+＜デバッガ＞
+-GDB	：ELF形式の実行ファイルを扱うデバッガ
+-OllyDbg：Windows実行ファイル(PE形式)を扱うデバッガ
+ImmunityDebugger：OllyDbgのPython APIが使えるver
+-x64dbg	：OllyDbgの64bitに対応しているver
+WinDbg	：PE形式ファイルを解析できるGUIのデバッガ、カーネルランドもいける
+＜プロセスメモリエディタ＞：実行中のプロセスのメモリを抽出し、書き換える
+-うさみみハリケーン：Windows上のプロセスメモリエディタ
+
+＜逆アセンブラ＞
+-IDA	：Windows上のデバッガ、逆コンパイラの機能も持った逆アセンブラ
+objdump	：CUIベースの逆アセンブラ
+
+＜逆コンパイラ＞
+Hex-Rays Decompiler	：有償
+Ratargetable Decompiler	：Webベースの逆コンパイラ
+-ILSpy			：.NET Frameworkの共通中間言語に向けた逆コンパイラ
+-dex2ja			：JavaバイトコードをJavaソースコードに変換する
+
+＜バイナリ解析基盤＞
+-radare2	：バイナリ解析をするのに有用な機能を持ったプログラム群
+
+＜バイナリエディタ＞
+Strling	：Windows上のGUIバイナリエディタ
+-ghex	：Linux上のGUIベースのバイナリエディタ
+Vim+xxd ：vim -b からEscでコマンドモードから":%!xxd"でxxdコマンドを呼び出す、":%!xxd =r"で編集した内容を反映させる

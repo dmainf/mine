@@ -1,0 +1,71 @@
+Linuxコマンド集
+
+rm -rv <dir>：中身があるディレクトリを削除する
+strings <option> <file> : 表示可能な文字列を出力する
+	: option以上の長さの文字列のみを出力する(デフォルトは4)
+tree <dir>：木構造でdirを表示する
+eog <file>：Linuxの画像ビューアーを使う
+
+hashid <hash>：ハッシュの識別をする
+hashcat -m <type> -a <option> '<hash>' --show：ハッシュ解析する
+※rockyou.txt：CTFの解析によく使われる辞書ファイル、お気に入りしてるから展開して使って
+↑ゴミだから使わなくて良い
+	：-m <type>
+	MD5	32文字の16進数	-m 0
+	SHA-1	40文字の16進数	-m 100	※他もあるからその都度検索
+
+	：-a <option>
+	辞書攻撃		-a 0
+	辞書の組み合わせ攻撃	-a 1
+	ブルートフォース攻撃	-a 3	※他もあるからその都度検索
+
+sed 's/<str>//g' <file>：strを含まないすべての部分を表示
+
+tr <string1> <string2>： string1をstring2に置換する
+	-d : string1を削除する
+	-s : string1が連続して存在する場合1個に置換する
+
+
+
+
+
+
+
+john --format=<type of hash> <file path> --wordlist="<dictionary file path>"：John the Ripperを使って解析する
+john --format=<type of hash> <file path> --show：解析した内容を確認する
+
+
+xxd <file>：ファイルを16進数で表示する
+exiftool <file>：画像のExif情報を確認する
+hexdump -C <file>：指定したファイルを16進数＋ASCIIで表示する
+
+
+
+touch : ファイルのタイムスタンプを変更する、存在しないファイル名の場合ファイルを新規作成する
+
+zip -r <file> : ファイル圧縮
+unzip <file> : ファイル解凍
+
+printenv : (print environment  variable)全ての環境変数を参照する
+export <name> <context> : 環境変数を定義する
+unset : 環境変数を削除する
+
+gdb : バイナリファイルを実際に動的に動かして、解析する
+
+echo <context> | base64 -d : 64進数でデコードする
+uudecode <file> : テキスト形式をバイナリ形式に変換する
+
+curl <option> <URL> : クライアントからサーバへリクエストしてデータを転送する
+	-I：ヘッダーの情報のみを表示する
+	-X　<http method>：httpメソッドを指定する
+	-d：データを指定する
+	-i：出力にレスポンスヘッダも含める
+
+ln -s <existing PATH> <PATH>：シンボリックリンクを作成する
+unlink <PATH>：シンボリックリンクを削除する※rmでもいける
+
+fls <file>：ディスクイメージ内のファイル名、ディレクトリ名を出力する
+icat <file> <inode> > <new file>：指定したinodeのファイルを出力する
+
+/etc/apache2/passwords：ユーザ認証求める
+/var/log/apache2/access.log：Webサーバのログが記録されてる

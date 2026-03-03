@@ -1,0 +1,21 @@
+＜tips＞
+
+uuencode：バイナリデータをテキストデータにエンコードする、base64、MIMEの前身
+UnicodeはChiberCiefで制御文字を見る
+
+Process Monitor (Procmon)：システムプロセスモニタリングツール、動的解析がだるいときにプロセスを全部見れる
+
+PE情報：Portable Executable情報、アプリケーションやシステムライブラリ（DLL）などを実行するための構造を定義したもの
+URSNIF(別名：Gozi)：銀行やオンライン決済の認証情報を狙うマルウェアで、トロイの木馬（トロージャン）の一種
+
+メモリダンプ：パソコンのダイニングメッセージ
+Windowsがクラッシュしたときに自動的に保存されるもの・証拠保全で取得する生データ
+後者←FTK Imagerで見れる
+
+LSASS：プロセスのメモリ空間に格納されているドメイン，ローカルユーザ名，パスワード
+NTLM：ハッシュタイプの1種，Windowsのパスワード
+RAT：Remote Access Trojan，リモートアクセス型のトロイの木馬
+
+.vhdファイル：Visual Hard Disc，仮想ハードディスクを保存しているファイル
+
+OpenJDK：JavaSEに基づいたプロダクトのソースコード置き場

@@ -1,0 +1,58 @@
+SQL
+
+LIKE '%あ%'：「あ」を含む
+WHERE release_year IS NOT NULL：NULLにはIS
+WHERE total_page BETWEEN 300 and 400：ANDを使わなくて済む
+IN(2004, 2018)：ORを使わなくて済む
+
+GROUP BY：ごとに
+HAVING：GROUP BY句に条件を適用させる
+ex)GROUP BY 社員ID HAVING SUM(売上金額) >= 1500;
+
+Window関数() OVER(PARTITION BY Culunm, ORDER BY )
+：PARTITION BYでグルーピングし，その中をORDER BYでソートする
+
+※GROUP BY句とは集約関数を使うタイミングが違う，Window関数は1行1行やる
+
+​
+WITH句：実行結果を一時的な表として名前付きで定義する
+
+WITH 新規テーブル名 AS（SQL文）
+
+※再帰的に表を参照したい場合
+WITH RECURSIVE 新規テーブル名 （列名） AS （
+非再帰的SELECT文
+UNION ALL
+再帰的なSELECT文
+）
+
+木構造のときとか使う(再帰的だから)
+
+
+・文字列結合演算子 ||
+	ex) '%' || :キーワード || '%'
+
+
+
+
+
+
+
+
+
+正規表現：
+
+[abc]：abcのどれか
+
+*：0回以上
++：1回以上
+?：0回または1回
+{n, m}：n～m回
+
+^：行頭
+$：行末
+
+.：任意の一文字
+\d：数字
+\w：単語
+\s：空白文字

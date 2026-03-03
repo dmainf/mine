@@ -1,0 +1,15 @@
+<システム企画>
+
+非機能要件：制約条件と品質要求
+アカウントアグリゲーション：複数の金融機関の情報を一括表示できる
+
+RFI：Rwquest For Information、システム開発会社に対して製品情報の提供を依頼するための文書 
+
+準委任契約：完成の義務は負わない
+総合評価落札方式：技術提案も評価対象にする
+
+BABOK：Business Analysis Body Of Knoeledge、ビジネスアナリシス
+EMS：Electronics Manufacturing Service、電磁機器の受託生産サービス
+
+SOE：System Of Engagement
+PBP：Pay Back Period、キャッシュフローが投資額を回収できるまでの期間
